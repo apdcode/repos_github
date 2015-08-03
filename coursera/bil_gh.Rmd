@@ -1,0 +1,273 @@
+---
+title: "Ford Galaxy Prisutvikling"
+author: "Arne Petter Drageset"
+date: "Wednesday, February 11, 2015"
+output: pdf_document
+---
+
+### Settings
+```{r Settings, echo = TRUE, eval = FALSE, results = "hide", warning = FALSE}
+
+# options(error = recover)
+
+rm(list=ls())
+
+getwd()
+setwd("C:/repos2/coursera")
+dir()
+
+```
+
+
+### Data
+```{r Data01, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+# Packages
+library(PerformanceAnalytics)
+library(zoo)
+library(tseries)
+library(mvtnorm)
+library(data.table)
+
+# Input data
+setwd("C:/repos/research/r_misc/bil/data")
+df1 <- read.table("bildata.txt", sep = ",", header = TRUE)
+names(df1)
+length(names(df1))
+
+# Transform dataframe to datatable and fix date
+dt1 <- data.table(df1)
+df1$dato
+dt1$dato <- gsub(".", '-', dt1$dato, fixed = T)
+dt1$dato <- as.Date(dt1$dato, "%d-%m-%Y")
+
+```
+
+```{r Themes01, echo = FALSE, eval = TRUE, results = "show", warning = FALSE, message = FALSE}
+# MyTheme01 - Grids --------------------------------------------
+library(ggplot2)
+mt01 <- theme(
+  panel.grid.major = element_line(colour="grey75", linetype = "dashed"),
+  panel.grid.minor = element_line(colour=FALSE, linetype="dashed", size=0.1),
+  panel.background = element_rect(fill=FALSE),
+  panel.border = element_rect(colour=FALSE, fill=NA, size=0.5))
+
+# MyTheme01 - Axis ---------------------------------------------
+mt01 <- mt01 + theme(
+  axis.line = element_line(color = FALSE),
+  axis.line.x = element_line(color = FALSE),
+  axis.line.y = element_line(color = FALSE))
+  #! axis.line.x = element_line("black") for å justere fargen over
+
+
+# MyTheme01 - Layout titles and legends
+mt01 <- mt01 + theme(
+  axis.title.x = element_text(colour="black", size=12),
+  axis.text.x = element_text(colour="black", size = 12),
+  axis.title.y = element_text(colour="black", size=12, angle = 90),
+  axis.text.y = element_text(colour="black", size = 12),
+  axis.ticks = element_line(colour = FALSE, size = 0, linetype = 'dashed'),
+  plot.title = element_text(colour="black", size=12))
+
+mt01 <- mt01 + theme(axis.text.y = element_text(colour = "black", size = 12))
+mt01 <- mt01 + theme(axis.title.x = element_text(vjust=0)) 
+mt01 <- mt01 + theme(axis.title.y = element_text(vjust=0))
+```
+
+
+### Analysis 1 - Price versus alder
+```{r Anlysis01_Model01, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+
+
+# Analysis01_Model01
+# pris ~ a + km
+A01M01 <- lm(pris~alder_mnd, data = dt1)
+summary(A01M01)
+
+coef_A01M01 <- coefficients(A01M01)
+
+M01_fitted <- fitted(A01M01)
+dt2 <- data.table(dt1, M01_fitted)
+
+# Analysis01_Model02
+# pris ~ a + km
+# A01M02 <- lm(pris)
+
+```
+
+```{r Analysis01_Plot01, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+
+#   Analysis01_Plot01
+#   dt2 <- data.table(dt2)
+
+library(ggplot2)
+
+# Plot foundation an theme
+p1 <- ggplot(dt1, aes(x=alder_mnd, y=pris))
+p1 <- p1 + mt01
+p1 <- p1 +  geom_point(color = "blue")
+
+# A01M01 Regression line
+p1 <- p1 + geom_abline(intercept = coef_A01M01[1], slope = coef_A01M01[2], colour = "blue", size = 0.5 )
+
+# Formatting
+p1 <- p1 + ggtitle("Alder versus pris")
+plot(p1)
+
+```
+
+
+### Analysis 2 - Pris versus km
+```{r Anlysis02, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+
+
+# Analysis01_Model01
+# pris ~ a + km
+
+km_tusen <- dt2$km / 1000
+dt3 <- data.table(dt2, km_tusen)
+dt3$skinn[4] <- 0
+
+A02M01 <- lm(pris~(km_tusen), data = dt3)
+summary(A02M01)
+coef_A02M01 <- coefficients(A02M01)
+
+
+
+
+```
+
+```{r Anlysis02_Plot01, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+
+# Analysis01_Plot01
+
+library(ggplot2)
+px2 <- ggplot(dt3, aes(x=km_tusen, y=pris))
+px2 <- px2 + mt01
+px2 <- px2 +  geom_point(color = "blue")
+# px2 <- px2 +  geom_point(aes(y=d12), color="blue") 
+# px2 <- px2 +  geom_point(aes(y=d11), color="red")
+# px2 <- px2 + xlab("Weight") + ylab("Miles per gallon")
+px2 <- px2 + geom_abline(intercept = coef_A02M01[1], slope = coef_A02M01[2], colour = "blue", size = 0.5 )
+# px2 <- px2 + geom_abline(intercept = coef_auto[1], slope = coef_auto[2], colour = "red", size = 0.5 )
+px2 <- px2 + ggtitle("Pris versus km")
+# px2 <- px2 + geom_abline(intercept = 15, slope = 1)
+
+plot(px2)
+
+```
+
+
+### Analysis 3 - Pris ~ a + km + motor [+ effekt + skinn + panorama + xenon + kamera + rutevarmer + krok]
+```{r Analysi03_Models, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+
+library(ggplot2)
+
+# Analysis01_Model01                                            pris ~ a + km_tusen + effekt
+A03M01 <- lm(pris ~ km_tusen + effekt, data = dt1)
+summary(A03M01)
+A03M01_fitted <- fitted(A03M01)
+
+dt3 <- data.table(dt3, A03M01_fitted)
+
+
+# Analysis01_Model02                                            pris ~ a + km_tusen + alder_mnd + effekt
+A03M02 <- lm(pris ~ km_tusen + alder_mnd + effekt, data = dt3)
+summary(A03M02)
+A03M02_fitted <- fitted(A03M02)
+length(A03M02_fitted)
+
+# Analysis01_Model03                                            pris ~ a + km_tusen + alder_mnd + effekt
+A03M03 <- lm(pris ~ km_tusen*alder_mnd + effekt + skinn + panorama + xenon + kamera + rutevarmer + motorvarmer, data = dt3)
+summary(A03M03)
+A03M03_fitted <- fitted(A03M03)
+length(A03M03_fitted)
+
+dt4 <- data.table(dt3, A03M02_fitted, A03M03_fitted)
+
+```
+
+```{r Analysis03_Plots01, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+
+# Analysis03_Plot01
+
+library(ggplot2)
+
+# Plots y = pris, x = km_tusen
+
+px3 <- ggplot(dt3, aes(x=km_tusen, y=pris))
+px3 <- px3 + mt01
+px3 <- px3 +  geom_point(color = "blue")
+# px3 <- px3 + xlab("Weight") + ylab("Miles per gallon")
+px3 <- px3 + geom_abline(intercept = coef_A02M01[1], slope = coef_A02M01[2], colour = "blue", size = 0.5 )
+px3 <- px3 + ggtitle("Pris versus km")
+ 
+
+
+# Adds labels for y = pris, text = forhandler
+
+# Lable Option 1 -  Lables with company names
+# pxx_labels <- paste(dt3$idx, dt3$forhandler, sep = " - ")
+
+# Lables Option 2 - Lables with index number only
+pxx_labels <- dt3$idx
+
+px3 <- px3 + annotate("text", label = pxx_labels, 
+                      x = dt3$km_tusen , 
+                      y = jitter(dt3$pris, factor = 250), 
+                      size = 4, colour = "black", hjust = 0, vjust = 0)
+
+
+# Labels, forhandler on pris estimated by A03M01_fitted
+
+# Adds lines and points for A03M01_fitted
+px3 <- px3 + ggtitle("Pris versus km + effekt")
+px3 <- px3 + geom_line(aes(y=A03M01_fitted), color = "green")
+px3 <- px3 + geom_point(aes(y=A03M01_fitted), color = "magenta")
+# px4 <- px3 + annotate("text", label = dt3$forhandler, 
+#                       x = dt3$km_tusen , 
+#                       y = jitter(A03M01_fitted, factor = 0), 
+#                       size = 4, colour = "black", hjust = 0, vjust = 0)
+
+
+# Adds lines and points for A03M02_fitted
+px3 <- px3 + ggtitle("Pris versus km + alder_mnd + effekt")
+px3 <- px3 + geom_line(aes(y=A03M02_fitted), color = "grey")
+px3 <- px3 + geom_point(aes(y=A03M02_fitted), color = "orange")
+# px4 <- px3 + annotate("text", label = dt3$forhandler, 
+#                       x = dt3$km_tusen , 
+#                       y = jitter(A03M02_fitted, factor = 0), 
+#                       size = 4, colour = "black", hjust = 0, vjust = 0)
+
+# Adds lines and points for A03M03_fitted
+
+px4 <- px3 + ggtitle("Pris versus km + alder_mnd + effekt")
+px4 <- px4 + geom_line(aes(y=A03M03_fitted), color = "grey")
+px4 <- px4 + geom_point(aes(y=A03M03_fitted), color = "orange")
+# px4 <- px4 + annotate("text", label = px4_labels, 
+#                       x = dt3$km_tusen , 
+#                       y = jitter(A03M02_fitted, factor = 250), 
+#                       size = 4, colour = "black", hjust = 0, vjust = 0)
+
+# Format chart area
+px4 <- px4 + xlim(0,125) + ylim(250000, 425000)
+
+
+# Write plot
+plot(px3)
+
+setwd("C:/repos/research/r_misc/bil/figure")
+plot(px4)
+ggsave("bil.png")
+dev.off()
+
+```
+
+```{r Analysis03_Plots02, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+# library(Rcmdr)
+# attach(dt3) # tror ikke denne trengs så lenge du viser til data.table i referansene under.
+# scatter3d(dt3$km_tusen, dt3$pris, dt3$alder_mnd)
+
+
+
+
+```
