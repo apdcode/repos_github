@@ -28,12 +28,13 @@ for(i in 1:length(pck_toload)) {
 
 \captionsetup[table]{labelformat=empty}
 
-### Nord Pool År 16
+### Getting the data
 ```{r Data_1, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE}
 
 # Load the data
 setwd("C:/repos_github/coursera/repres/data")
 dt1 <- read.table("activity.csv", sep = ",", header = TRUE)
+dt1 <- data.table(dt1)
 names(dt1)
 length(names(dt1))
 
@@ -46,12 +47,27 @@ dt1 <- dt2
 remove(dt2)
 ```
 
-
+### Analysis part 1 - The data table way
 ```{r Analysis_1, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
+# Number of steps per day, data.table
+dt2 <- dt1[,.(steps.sum = sum(steps)),by=date]
 
-# Histogram
-h1 <- ggplot(data=dt1, aes(dt1$steps), xlab = "steps") + geom_histogram()
+# Number of steps per day, sqldf
+dt2s <- sqldf("SELECT sum(steps), date 
+        FROM dt1
+        Group by date")
+
+names(dt2)
+
+# Number of steps per day, calculations
+nsteps <- sum(dt2$steps)
+avgsteps <- mean(dt2$steps.sum)
+medsteps <- median(dt2$steps.sum)
+
+
+# Histogram of number of steps per day
+h1 <- ggplot(data=dt2, aes(dt2$steps.sum), xlab = "steps") + geom_histogram()
 h1 <- h1 + theme_classic()
 h1 <- h1 + ggtitle("Number of steps") + xlab("steps")
 plot(h1)
