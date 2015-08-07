@@ -1,0 +1,265 @@
+---
+title: "The Quantified Self"
+header-includes: \usepackage{caption}
+output: html_document
+fig_caption: no
+---
+
+```{r Settings, echo = FALSE, eval = TRUE, results = "hide", warning = FALSE, message = FALSE}
+rm(list=ls())
+
+# List loaded packages
+# (.packages())
+
+# Packages loaded
+pck_loaded <- (.packages())
+
+# Packages to load
+pck_toload <- c('ggplot2', 'mvtnorm', 'data.table', 'sqldf', 'stargazer', 'xtable')
+
+# Load packages
+for(i in 1:length(pck_toload)) {
+   if (!pck_toload[i] %in% pck_loaded)
+    print(pck_toload[i])
+    library(pck_toload[i], character.only = TRUE)
+}
+
+```
+
+\captionsetup[table]{labelformat=empty}
+
+### Nord Pool År 16
+```{r Data_1, echo = FALSE, eval = TRUE, results = "show", warning = FALSE, message = FALSE}
+
+df1 <- read.table("coint01.txt", sep = ",", header = TRUE)
+names(df1)
+length(names(df1))
+
+df1 <- data.frame(df1)
+
+
+
+
+#/  1   Henter data fra Excel fil
+dir1 <- "L:/BKK Produksjon/_Produksjon og Marked/Analyse/Kristina/Framtidsprisar"
+fil1 <- "Endringar i framtidskontraktar med forklaring 2015.xlsx"
+src1 <- paste(dir1, fil1, sep = "/")
+
+df_xl1 <- readWorksheetFromFile(src1, 
+                            sheet=1, 
+                            startRow = 1,
+                            endCol = 14)
+
+#/  2   Legger til kolonne med lengde på Forklaring for å skille mellom komplekse og mindre komplekse events
+df_complexevents <- data.table(nchar(df_xl1[,"Forklaring"]))
+dt1 <- data.table(df_xl1, df_complexevents)
+
+#/  3   Endrer navn 
+newnames <- names(dt1)
+newnames[4] <- "Kategori1"
+newnames[10] <- "Kategori2"
+newnames[15] <- "eType1"
+
+setnames(dt1, old = names(dt1), new = newnames)
+# df_events$Date2 <-gsub(".", '-', df_events$Date2, fixed = T)
+
+#/  4   Lager tabell med et ønsket produkt
+df_ENOY16 <- data.table(sqldf('SELECT * FROM dt1
+                                WHERE "Kategori1" = "ENOY16"'))
+
+#/  5   Velger ENOY16 og events med lange forklaringer
+dt_ENOY16_eType1 <-  data.table(sqldf('SELECT Dato, Close, Endring,  Forklaring as Event FROM dt1
+                                        WHERE "Kategori1" = "ENOY16"
+                                        AND "eType1" > 20'))
+
+# Fint subsetting triks fra 
+# [TipsRef] http://stackoverflow.com/questions/5234117/how-to-drop-columns-by-name-in-a-data-frame
+# dat[ , !names(dat) %in% c("z","u")] ## works as expected
+# dt_ENOY16_eType1[ , !names(dt_ENOY16_eType1) %in% c("Dato","Forklaring")]
+  
+
+#/ 6   Fjerner doble kommentarer til nærliggende events.
+dt_events <- dt_ENOY16_eType1
+dt_events <- dt_events[with(dt_events, c(Event[-1]!= Event[-nrow(dt_events)], TRUE)),]
+
+#/ 7   Endrer datoformatet i df_events
+##date_events <-gsub(".", '-', df2$Dato, fixed = T)
+##date_events <- as.Date(substr(dt_events$Dato,1,10), "%Y-%m-%d")
+dt_events[,"Dato"] <- as.Date(substr(dt_events$Dato,1,10), "%Y-%m-%d")
+
+
+#/  8   Ordner norske bokstaver
+dt_events$Event <- gsub("Ã¦", 'æ', dt_events$Event, fixed = T)
+dt_events$Event <- gsub("Ã¸", 'ø', dt_events$Event, fixed = T)
+dt_events$Event <- gsub("Ã¥", 'å', dt_events$Event, fixed = T)
+##tail(dt_events, 20)
+```
+
+
+```{r Price_Data_1, echo = FALSE, eval = TRUE, results = "hide", warning = FALSE, message = FALSE}
+
+#   1   Leser prisdata
+setwd("C:/repos/research/r_analysis/likevekter_enoyr2016/data")
+df1 <- read.table("coint01.txt", sep = ",", header = TRUE)
+names(df1)
+length(names(df1))
+df1 <- data.frame(df1)
+
+#   2   Fjerner manglende data
+df1 <- df1[c("Dato", "enoyr2016")]
+df1 <- df1[complete.cases(df1),]
+dt_prices <- data.table(df1)
+dt_prices[,"Dato"] <- gsub(".", '-', dt_prices$Dato, fixed = T)
+dt_prices[,"Dato"] <- as.Date(dt_prices$Dato, "%d-%m-%Y")
+
+##tail(dt_prices)
+
+#   3   Joiner dt_events og dt_prices
+dt_main <- merge(x = dt_prices, y = dt_events, by = "Dato", all.x = TRUE)
+##max.col(!is.na(dt_main))
+
+#   4   Fjerner alle observasjoner som kommer FØR første event
+indx <- which(!is.na(dt_main$Event), arr.ind=TRUE)
+start_events <- indx[1]
+dt_main
+dt_main2 <- dt_main[start_events:nrow(dt_main),]
+dt_main2
+```
+
+
+\captionsetup[table]{labelformat=empty}
+
+```{r Tabell_1_kable, echo = FALSE, eval = TRUE, results = "hide", warning = FALSE, message = FALSE, tab.cap = NULL, fig.cap = NULL}
+library(zoo)
+
+
+#   1   Lager tiddserier av event data og pris data med tilhørende datoer
+dt_main2 <- dt_main[start_events:nrow(dt_main),]
+es1 <- zoo(dt_main2$Event, dt_main2$Dato)             ## Event Series 1
+es1 <- na.omit(es1)
+ps1 <- zoo(dt_main2$enoyr2016, dt_main2$Dato)         ## Price Series 1
+df_zoo1 <- merge(es1, ps1) ## ikke i bruk
+df_zoo2 <- na.omit(df_zoo1)
+##df_zoo2
+
+#   2   Lager tabell
+#\captionsetup{labelformat=empty}
+tbl1 <- knitr::kable(dt_events, format = "pandoc", digits = 2, caption = c("Tabell 1a - Events Enoyr2016 (kable)"))
+#xtable(dt_events, caption = "hello")
+print(tbl1)
+
+```
+
+```{r Tabell_3_xtable, echo = FALSE, eval = TRUE, results = "asis", warning = FALSE, message = FALSE}
+
+#   1   Endrer klassen til dato i dt_events fordi xtable ikke liker class dates
+dt_events_1b <- dt_events
+dt_events_1b$Dato <- as.character(dt_events_1b$Dato)
+
+#   2   Finner laveste og høyeste prisendring for merking
+#       Gjør først alle endringstall om til class string for å kunne bestemme farge
+change_high <- max(dt_events_1b$Endring)
+change_low <- min(dt_events_1b$Endring)
+# dt_events_1b$Endring = ifelse(dt_events_1b$Endring > 0.2, paste0("\\colorbox{yellow}{", round(dt_events_1b$Endring, digits = 2), "}"), round(dt_events_1b$Endring, digits = 2))
+
+#   3   Egendefinert funksjon for formattering av LaTeX tabeller
+formfun <- function(x, change_high, change_low) {
+  if (x == change_high) {
+	                                  paste0("\\colorbox{yellow}{", round(x, digits = 2), "}")
+                        } else if (x == change_low) {
+	                                  paste0("\\colorbox{red}{", round(x, digits = 2), "}")
+                        } else {
+	                                  paste0("\\colorbox{white}{", round(x, digits = 2), "}")
+                        }
+}
+
+meh <- dt_events$Endring
+
+# For loop eksempel:
+# for(i in 1:length(meh)) {print(meh[i])}
+
+#   4   Formatterer høy og lav i dt_events_1b$Endring
+for(i in 1:length(meh)) {meh[i] <- formfun(dt_events$Endring[i], max(dt_events$Endring), min(dt_events$Endring))}
+dt_events_1b$Endring <- meh
+
+#   5   Formatterer eventbeskrivelsene etter formatene i dt_events_1b$Endring
+are_high <- grepl("yellow", meh)
+are_low <-  grepl("red", meh)
+meh2 <-dt_events$Event
+
+for(i in 1:length(meh2)) {
+    if (are_high[i] == TRUE) { meh2[i] <-  paste0("\\colorbox{yellow}{",dt_events$Event[i], "}")
+    }
+}
+
+for(i in 1:length(meh2)) {
+    if (are_low[i] == TRUE) { meh2[i] <-  paste0("\\colorbox{red}{",dt_events$Event[i], "}")
+    }
+}
+ 
+dt_events_1b$Event <- meh2
+
+#   2   Lager tabell
+print(xtable(dt_events_1b,
+      align = c('l','l','r','r','l'),
+      caption = 'Viktige hendelser Enoyr 2016'),
+      caption.placement = 'top',
+      comment = FALSE,
+      sanitize.text.function = function(x) x)
+
+
+```
+
+```{r TimeSeries_1, echo = FALSE, eval = FALSE, results = "hide", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
+
+#   1   Grafer df_zoo1 fra forrige chunk
+##dev.off()
+##length(ps1)
+ps1 <- tail(ps1, 50)
+chart.TimeSeries(ps1_d,
+                 date.format = "%Y-%m-%d",
+                 ylim = c(24, max(ps1)),
+                 ylab = 'Euro / MWh',
+                event.lines = time(es1),
+                event.labels = es1,
+                event.color = "blue",
+                auto.grid = FALSE)
+                ##box("outer", col="orange"))
+                ##box(bty = "7", col = "black"))
+box(lty = 'solid', bty = '7', col = "white", lwd = 3) # boxL
+```
+
+
+```{r TimeSeries_2, echo = FALSE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
+
+##  Lage endringsplott med notasjoner på de største bevegelsene
+##  http://timelyportfolio.github.io/rCharts_time_series/history.html
+##  http://www.inside-r.org/packages/cran/zoo/docs/autoplot.zoo
+##  http://stackoverflow.com/questions/12773822/why-does-xy-join-of-data-tables-not-allow-a-full-outer-join-or-a-left-join
+##  http://stackoverflow.com/questions/1735540/creating-a-pareto-chart-with-ggplot2-and-r
+##  http://stackoverflow.com/questions/10861773/remove-grid-background-color-and-top-and-right-borders-from-ggplot2
+
+ps1_d <- diff(ps1)
+chart.Bar(ps1_d, main = "")
+myg <- data.table(fortify(ps1_d))
+setnames(myg, old = names(myg), new = c('Dato', 'Prisendring'))
+
+dt_main3 <- dt_main2
+setkey(dt_main3, Dato)
+setkey(myg, Dato)
+dt_main4 <- merge(dt_main3, myg)
+
+
+#   Line plot
+p1 <- qplot(dt_main4$Prisendring, x = dt_main4$Dato, geom ="blank")
+
+
+p1 <- p1 + geom_bar(stat = "identity", size = 0.1, colour = "grey", fill = "white")
+p1 <- p1 + theme_classic()
+
+
+# Annotations
+p2 <- p1 + geom_text(aes(label = dt_main4$Event), colour = "blue", size = 4, angle = 0,hjust = 1, vjust = 0)
+p2
+
+```
