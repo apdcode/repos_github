@@ -176,5 +176,5 @@ i
 nmiss
 themissing <- nrow(subset(dx1, is.na(dt_nonmissing$steps)))
 themissing
-
+# github push test
 ```
