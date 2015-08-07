@@ -116,7 +116,7 @@ The interval which contains the maximum average steps per day, is `r maxint$inte
 
 
 
-### Analysis part 2 - Missing values
+### Analysis part 3 - Missing values
 ```{r Analysis_3, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
 # OBJECTIVE:  Replace missing step data for all intervals with
@@ -176,5 +176,32 @@ i
 nmiss
 themissing <- nrow(subset(dx1, is.na(dt_nonmissing$steps)))
 themissing
-# github push test
+
+missmix <- data.table(dt_missing, dt_nonmissing$steps)
+```
+
+### Analysis part 4 - New histogram after accounting for missing values
+```{r Analysis_4, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
+
+#   1     The data
+
+dt5 <- data.table(sqldf("SELECT sum(steps) as steps, date 
+        FROM dt_nonmissing
+        Group by date"))
+
+# Number of steps per day, calculations
+nsteps_dt5 <- sum(dt5$steps)
+avgsteps_dt5 <- mean(dt5$steps)
+medsteps_dt5 <- median(dt5$steps)
+
+
+# Histogram of number of steps per day
+h1 <- ggplot(data=dt5, aes(dt5$steps)) + geom_histogram(colour = "blue", fill = "grey")
+h1 <- h1 + theme_classic()
+h1 <- h1 + ggtitle("Total number of steps per day") + xlab("steps")
+plot(h1)
+setwd("C:/repos_github/coursera/repres")
+ggsave(filename = "Histogram Number of Steps no missing values.pdf", plot = h1)
+
+
 ```
