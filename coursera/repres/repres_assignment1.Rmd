@@ -8,6 +8,9 @@ fig_caption: no
 ```{r Settings, echo = FALSE, eval = TRUE, results = "hide", warning = FALSE, message = FALSE}
 rm(list=ls())
 
+# Table settings
+# \captionsetup[table]{labelformat=empty}
+
 # List loaded packages
 # (.packages())
 
@@ -26,7 +29,7 @@ for(i in 1:length(pck_toload)) {
 
 ```
 
-\captionsetup[table]{labelformat=empty}
+
 
 ### Getting the data
 ```{r Data_1, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE}
@@ -35,8 +38,8 @@ for(i in 1:length(pck_toload)) {
 setwd("C:/repos_github/coursera/repres/data")
 dt1 <- read.table("activity.csv", sep = ",", header = TRUE)
 dt1 <- data.table(dt1)
-names(dt1)
-length(names(dt1))
+#names(dt1)
+#length(names(dt1))
 
 # Remove missing values
 dt2 <- dt1[complete.cases(dt1),]
@@ -47,7 +50,7 @@ dt1 <- dt2
 remove(dt2)
 ```
 
-### Analysis part 1 - The data table way
+### Analysis part 1 - Histogram
 ```{r Analysis_1, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
 # Number of steps per day, data.table
@@ -58,7 +61,7 @@ dt2s <- sqldf("SELECT sum(steps), date
         FROM dt1
         Group by date")
 
-names(dt2)
+#names(dt2)
 
 # Number of steps per day, calculations
 nsteps <- sum(dt2$steps)
@@ -67,13 +70,112 @@ medsteps <- median(dt2$steps.sum)
 
 
 # Histogram of number of steps per day
-h1 <- ggplot(data=dt2, aes(dt2$steps.sum), xlab = "steps") + geom_histogram()
+h1 <- ggplot(data=dt2, aes(dt2$steps.sum)) + geom_histogram(colour = "blue", fill = "grey")
 h1 <- h1 + theme_classic()
-h1 <- h1 + ggtitle("Number of steps") + xlab("steps")
+h1 <- h1 + ggtitle("Total number of steps per day") + xlab("steps")
 plot(h1)
+setwd("C:/repos_github/coursera/repres")
+#ggsave(filename = "Histogram Number of Steps.pdf", plot = h1)
 
 ```
 
+The average number of steps taken per day, without removing missing values, is `r nsteps`. The mean and median for the same category is 10788.19  and 10765.
 
-\captionsetup[table]{labelformat=empty}
 
+### Analysis part 2 - Daily pattern
+```{r Analysis_2, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
+
+#   1   Average number of steps taken, averaged across all days
+#   1.1 Data
+dt3 <- sqldf("SELECT interval, avg(steps) as steps 
+        FROM dt1
+        Group by interval")
+
+idx1 <- 1:nrow(dt3)
+dt4 <- data.table(dt3, idx1)
+
+#   1.2 Plot
+p1 <- ggplot(dt4, aes((interval), steps)) + geom_line(colour = "blue") + theme_classic() + 
+      ggtitle("Daily pattern by 5 minute interval") + xlab("interval")
+#p1
+
+p2 <- ggplot(dt4, aes((idx1), steps)) + geom_line(colour = "blue") + theme_classic() + 
+      ggtitle("Daily pattern by 5 minute interval") + xlab("interval")
+p2
+
+#   2   Which 5 minute interval has the max number of steps?
+maxsteps = max(dt4$steps)
+maxint <- sqldf("SELECT interval, max(steps)
+        FROM dt4")
+maxint$interval[1]
+
+#ggsave(filename = "Daily pattern.pdf", plot = p1)
+```
+
+The interval which contains the maximum average steps per day, is `r maxint$interval[1]`.
+
+
+
+### Analysis part 2 - Missing values
+```{r Analysis_2, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
+
+# OBJECTIVE:  Replace missing step data for all intervals with
+#             average number of stepds per day for those observations
+#             without missing values.
+#             Missing observations, if any, for date and interval are removed.
+
+#   1     Get the data
+setwd("C:/repos_github/coursera/repres/data")
+dx1 <- read.table("activity.csv", sep = ",", header = TRUE)
+dx1 <- data.table(dx1)
+
+#   1.2   Handle missing observations for date and interval
+allRows <- nrow(dx1)
+missingDates <- nrow(subset(dx1, !is.na(dx1$date)))
+missingInterval <- nrow(subset(dx1, !is.na(dx1$interval)))
+
+#   2     Handle missing observations for steps
+missingSteps <- nrow(subset(dx1, !is.na(dx1$steps)))
+
+#   2.1   Find average steps per day for each interval
+dx3 <- subset(dx1, !is.na(dx1$steps))
+dt_avgsteps <- data.table(sqldf("SELECT interval, avg(steps) as steps 
+        FROM dt1
+        Group by interval"))
+
+#   2.2   Replace missing values in dx4 with values in dt_avgsteps
+dt_missing <- dx1
+
+for(i in 1:length(meh)) {meh[i] <- formfun(dt_events$Endring[i], max(dt_events$Endring), min(dt_events$Endring))}
+
+i <- 1
+j <- 1
+for(i in 1:length(dt_avgsteps$steps)) {
+  #print(dt_avgsteps$steps[i])
+  for(j in 1:length(dt_missing$steps)) {
+    #print(dx4$steps[j])
+    
+  }
+    
+}
+i
+j
+
+
+#---Funker
+for(j in 1:length(dt_missing$steps)) {
+  print(dx4$steps[j])
+}
+#---Slutt
+
+#   2   Fill interval mean where values are missing
+# Load the data
+setwd("C:/repos_github/coursera/repres/data")
+dx1 <- read.table("activity.csv", sep = ",", header = TRUE)
+dx1 <- data.table(dx1)
+
+# Remove missing values
+dx2 <- dx1[!complete.cases(dt1),]
+
+
+```
