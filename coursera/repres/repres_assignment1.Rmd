@@ -155,7 +155,7 @@ themissing <- nrow(subset(dx1, is.na(dx1$steps)))
 dt_nonmissing <- dt_missing
 themissing <- nrow(subset(dx1, is.na(dt_nonmissing$steps)))
 themissing
-
+fakesteps <- 0
 for(i in 1:length(dt_missing$steps)) {
   #print(dt_avgsteps$steps[i])
   if (is.na(dt_missing$steps[i])) {
@@ -167,6 +167,7 @@ for(i in 1:length(dt_missing$steps)) {
           if (dt_missing$interval[i] == dt_avgsteps$interval[j]) {
               # print(paste(i,j, "missing", sep = " - "))
               dt_nonmissing$steps[i] <- dt_avgsteps$steps[j]
+              fakesteps <- fakesteps + dt_avgsteps$steps[j]
               break
           }
         }
@@ -176,9 +177,13 @@ i
 nmiss
 themissing <- nrow(subset(dx1, is.na(dt_nonmissing$steps)))
 themissing
+fakesteps
 
 missmix <- data.table(dt_missing, dt_nonmissing$steps)
 ```
+
+A total of `r nmiss` missing observations for steps in the original dataset have been replaced with the average number of steps for the corresponding category. The sum of steps added to the original dataset is `r fakesteps`
+
 
 ### Analysis part 4 - New histogram after accounting for missing values
 ```{r Analysis_4, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
