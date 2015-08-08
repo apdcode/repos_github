@@ -73,6 +73,7 @@ medsteps <- median(dt2$steps.sum)
 h1 <- ggplot(data=dt2, aes(dt2$steps.sum)) + geom_histogram(colour = "blue", fill = "grey")
 h1 <- h1 + theme_classic()
 h1 <- h1 + ggtitle("Total number of steps per day") + xlab("steps")
+h1 <- h1 + ylim(0, 14)
 plot(h1)
 setwd("C:/repos_github/coursera/repres")
 #ggsave(filename = "Histogram Number of Steps.pdf", plot = h1)
@@ -182,8 +183,8 @@ fakesteps
 missmix <- data.table(dt_missing, dt_nonmissing$steps)
 ```
 
-A total of `r nmiss` missing observations for steps in the original dataset have been replaced with the average number of steps for the corresponding category. The sum of steps added to the original dataset is `r fakesteps`
-
+A total of `r nmiss` missing observations for steps in the original dataset have been replaced with the average number of steps for the corresponding category. The sum of steps added to the original dataset is 85128.
+Below is a histogram showing the distribution of steps after missing values have been imputed.
 
 ### Analysis part 4 - New histogram after accounting for missing values
 ```{r Analysis_4, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
@@ -204,6 +205,39 @@ medsteps_dt5 <- median(dt5$steps)
 h1 <- ggplot(data=dt5, aes(dt5$steps)) + geom_histogram(colour = "blue", fill = "grey")
 h1 <- h1 + theme_classic()
 h1 <- h1 + ggtitle("Total number of steps per day") + xlab("steps")
+h1 <- h1 + ylim(0, 14)
+plot(h1)
+setwd("C:/repos_github/coursera/repres")
+ggsave(filename = "Histogram Number of Steps no missing values.pdf", plot = h1)
+
+
+```
+
+### Analysis part 4 - New histogram showing the difference of the two prioe histograms
+```{r Analysis_4, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
+
+#   1     The data
+dt6 <- dt_missing
+dt6$steps[is.na(dt6$steps)] <- 0
+
+stepdiff <- dt_nonmissing$steps - dt6$steps
+dt7 <- data.table(dt6, stepdiff)
+
+dt8 <- data.table(sqldf("SELECT sum(steps) as steps, date 
+        FROM dt7
+        Group by date"))
+
+# Number of steps per day, calculations
+nsteps_dt8 <- sum(dt8$steps)
+avgsteps_dt8 <- mean(dt8$steps)
+medsteps_dt8 <- median(dt8$steps)
+
+
+# Histogram of number of steps per day
+h1 <- ggplot(data=dt8, aes(dt8$steps)) + geom_histogram(colour = "blue", fill = "grey")
+h1 <- h1 + theme_classic()
+h1 <- h1 + ggtitle("Total number of steps per day") + xlab("steps")
+h1 <- h1 + ylim(0, 14)
 plot(h1)
 setwd("C:/repos_github/coursera/repres")
 ggsave(filename = "Histogram Number of Steps no missing values.pdf", plot = h1)
