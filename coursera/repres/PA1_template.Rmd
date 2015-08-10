@@ -33,7 +33,7 @@ for(i in 1:length(pck_toload)) {
 remove(i)
 ```
 
-### 1 - Loading and preprocessing the data
+### Part 1 - Loading and preprocessing the data
 ```{r Data_1, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE}
 
 #___1.1___Load the data
@@ -52,7 +52,7 @@ naRemoved <- nrow(dt_initial) - nrow(dt_initialNoNa)
 remove(dt1)
 ```
 
-### 2 - What is the mean total number of steps taken per day?
+### Part 2 - What is the mean total number of steps taken per day?
 ```{r Analysis_1, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
 #___2.1___Calculate the total number of steps taken per day
@@ -91,7 +91,7 @@ medsteps <- median(dt_dailysteps$steps.sum)
 
 The average number of steps taken per day, without removing missing values, is `r nsteps`. The mean and median for the same category is 10788.19  and 10765.
 
-### 3 - What is the average daily pattern?
+### Part 3 - What is the average daily pattern?
 ```{r Analysis_2, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
 #___3.1___Make a time series plot  of the 5 minute intervals averaged accross all days.
@@ -140,7 +140,7 @@ p1
 
 The interval which contains the maximum average steps per day, is `r maxint$interval[1]`.
 
-### Analysis part 3 - Missing values
+### Part 4 - Imputing Missing values
 ```{r Analysis_3, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
 # OBJECTIVE:  Replace missing step data for all intervals with
