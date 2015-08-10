@@ -249,44 +249,13 @@ ggsave(filename = "Histogram Number of Steps no missing values.pdf", plot = h1)
 
 ![plot of chunk Analysis_4](figure/Analysis_4-2.png) 
 
-### Analysis part 4 - New histogram showing the difference of the two prioe histograms
+### Final touch
 
 ```r
-#   1     The data
-dt6 <- dt_missing
-dt6$steps[is.na(dt6$steps)] <- 0
-
-stepdiff <- dt_nonmissing$steps - dt6$steps
-dt7 <- data.table(dt6, stepdiff)
-
-dt8 <- data.table(sqldf("SELECT sum(stepdiff) as stepdiff, date 
-        FROM dt7
-        Group by date"))
-
-# Number of steps per day, calculations
-nsteps_dt8 <- sum(dt8$steps)
-avgsteps_dt8 <- mean(dt8$steps)
-medsteps_dt8 <- median(dt8$steps)
-
-
-# Histogram of number of steps per day
-h1 <- ggplot(data=dt8, aes(dt8$stepdiff)) + geom_histogram(colour = "blue", fill = "grey")
-h1 <- h1 + theme_classic()
-h1 <- h1 + ggtitle("Total number of steps per day") + xlab("steps")
-h1 <- h1 + ylim(-14, 14)
-plot(h1)
+#___1.0___  Make md file
+knit('repres_assignment1.Rmd')
 ```
 
-![plot of chunk Analysis_5](figure/Analysis_5-1.png) 
-
-```r
-setwd("C:/repos_github/coursera/repres")
-ggsave(filename = "Histogram Number of Steps no missing values.pdf", plot = h1)
 ```
-
-![plot of chunk Analysis_5](figure/Analysis_5-2.png) 
-
-```r
-library(knitr)
-# knit2html("repres_assignment1.Rmd","repres_assignment1.html")
+## Error in parse_block(g, patterns): duplicate label 'Settings'
 ```

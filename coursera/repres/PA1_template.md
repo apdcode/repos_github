@@ -6,36 +6,11 @@ fig_caption: no
 ---
 
 ### R settings and packages
-```{r Settingz, echo = FALSE, eval = TRUE, results = "hide", warning = FALSE, message = FALSE}
 
-#___0.1___Clear workspace
-rm(list=ls())
-
-# Table settings
-# \captionsetup[table]{labelformat=empty}
-
-# List loaded packages
-# (.packages())
-
-#___0.2___Load packages
-# Packages loaded
-pck_loaded <- (.packages())
-
-# Packages to load
-pck_toload <- c('ggplot2', 'mvtnorm', 'data.table', 'sqldf', 'stargazer', 'xtable')
-
-# Load packages
-for(i in 1:length(pck_toload)) {
-   if (!pck_toload[i] %in% pck_loaded)
-    print(pck_toload[i])
-    library(pck_toload[i], character.only = TRUE)
-}
-remove(i)
-```
 
 ### Part 1 - Loading and preprocessing the data
-```{r Data_1, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE}
 
+```r
 #___1.1___Load the data
 setwd("C:/repos_github/coursera/repres/data")
 dt_initial <- data.table(read.table("activity.csv", sep = ",", header = TRUE))
@@ -49,12 +24,11 @@ dt_initialNoNa <- dt_initial[complete.cases(dt_initial),]
 
 # Rows with missing data removedc
 naRemoved <- nrow(dt_initial) - nrow(dt_initialNoNa)
-
 ```
 
 ### Part 2 - What is the mean total number of steps taken per day?
-```{r Analysis_1, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
+```r
 #___2.1___Calculate the total number of steps taken per day
 #         For the total number of steps per day, and the corresponding histogram,
 #         it is convenient to transform the data into showing unique dates in the date column.
@@ -78,6 +52,11 @@ h1 <- h1 + theme_classic()
 h1 <- h1 + ggtitle("Total number of steps per day") + xlab("steps")
 h1 <- h1 + ylim(0, 14)
 plot(h1)
+```
+
+![plot of chunk Analysis_1](figure/Analysis_1-1.png) 
+
+```r
 #setwd("C:/repos_github/coursera/repres")
 #ggsave(filename = "Histogram Number of Steps.pdf", plot = h1)
 
@@ -85,15 +64,13 @@ plot(h1)
 nsteps <- sum(dt_dailysteps$steps)
 avgsteps <- mean(dt_dailysteps$stepsum)
 medsteps <- median(dt_dailysteps$stepsum)
-
-
 ```
 
-The average number of steps taken per day, without removing missing values, is `r nsteps`. The mean and median for the same category is 10788.19  and 10765.
+The average number of steps taken per day, without removing missing values, is 570608. The mean and median for the same category is 10788.19  and 10765.
 
 ### Part 3 - What is the average daily pattern?
-```{r Analysis_2, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
+```r
 #___3.1___Make a time series plot  of the 5 minute intervals averaged accross all days.
 #         Again, it is convenent to transform the original data.
 #         Here, the data is stored as an average for each interval accross all observed days
@@ -139,11 +116,13 @@ p1 <- p1 + theme(plot.title = element_text(lineheight=.8, face="bold"))
 p1
 ```
 
-The interval which contains the maximum average steps per day, is `r maxint$interval[1]`.
+![plot of chunk Analysis_2](figure/Analysis_2-1.png) 
+
+The interval which contains the maximum average steps per day, is 835.
 
 ### Part 4 - Imputing Missing values
-```{r Analysis_3, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
+```r
 # OBJECTIVE:  Replace missing step data for all intervals with
 #             average number of stepds per day for those observations
 #             without missing values.
@@ -152,7 +131,20 @@ The interval which contains the maximum average steps per day, is `r maxint$inte
 #___4.1___Calculate and report the total number of missing values in the dataset 
 # A look at the data
 summary(dt_initial)
+```
 
+```
+##      steps                date          interval     
+##  Min.   :  0.00   2012-10-01:  288   Min.   :   0.0  
+##  1st Qu.:  0.00   2012-10-02:  288   1st Qu.: 588.8  
+##  Median :  0.00   2012-10-03:  288   Median :1177.5  
+##  Mean   : 37.38   2012-10-04:  288   Mean   :1177.5  
+##  3rd Qu.: 12.00   2012-10-05:  288   3rd Qu.:1766.2  
+##  Max.   :806.00   2012-10-06:  288   Max.   :2355.0  
+##  NA's   :2304     (Other)   :15840
+```
+
+```r
 # Total number of missing values
 missingTotal <- sum(sapply(dt_initial, function(x) sum(is.na(x))))
 
@@ -207,7 +199,19 @@ for(i in 1:length(dt_initial$steps)) {
 # missmix <- data.table(dt_missing, dt_nonmissing$steps)
 # Look at the data
 head(dt_imputed)
+```
 
+```
+##    steps       date interval
+## 1:     1 2012-10-01        0
+## 2:     0 2012-10-01        5
+## 3:     0 2012-10-01       10
+## 4:     0 2012-10-01       15
+## 5:     0 2012-10-01       20
+## 6:     2 2012-10-01       25
+```
+
+```r
 setwd("C:/repos_github/coursera/repres/data")
 write.table(dt_imputed, "imputedData.csv", row.names = FALSE)
 #remove(nonmissing)
@@ -223,8 +227,33 @@ dt_dailysteps2 <- data.table(sqldf("SELECT sum(steps) as stepsum, date
 
 # Look at the data
 head(dt_dailysteps)
-head(dt_dailysteps2)
+```
 
+```
+##   stepsum       date
+## 1     126 2012-10-02
+## 2   11352 2012-10-03
+## 3   12116 2012-10-04
+## 4   13294 2012-10-05
+## 5   15420 2012-10-06
+## 6   11015 2012-10-07
+```
+
+```r
+head(dt_dailysteps2)
+```
+
+```
+##    stepsum       date
+## 1:   10641 2012-10-01
+## 2:     126 2012-10-02
+## 3:   11352 2012-10-03
+## 4:   12116 2012-10-04
+## 5:   13294 2012-10-05
+## 6:   15420 2012-10-06
+```
+
+```r
 # Number of steps per day, calculations
 nstepsNoNa <- sum(dt_dailysteps2$steps)
 avgsteNoNa <- mean(dt_dailysteps2$steps)
@@ -238,24 +267,30 @@ h2 <- h2 + ylim(0, 14)
 #plot(h2)
 setwd("C:/repos_github/coursera/repres")
 ggsave(filename = "Histogram Number of Steps no missing values.pdf", plot = h1)
-
-
 ```
+
+![plot of chunk Analysis_3](figure/Analysis_3-1.png) 
 
 There are a total of 2304 missing values in the original dataset, all of which are missing observations for steps for given dates and intervals.
 
 The sum of steps added to the original dataset is 85128.
 Below is a histogram showing the distribution of steps after missing values have been imputed.
-```{r Analysis_31, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
+
+```r
 plot(h2)
 ```
 
+![plot of chunk Analysis_31](figure/Analysis_31-1.png) 
+
 
 ### Final touch
-```{r finals, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
+```r
 #___1.0___  Make md file
-setwd("C:/repos_github/coursera/repres")
 library(knitr)
 knit('PA1_template.Rmd')
+```
+
+```
+## Error in parse_block(g, patterns): duplicate label 'Settingz'
 ```
