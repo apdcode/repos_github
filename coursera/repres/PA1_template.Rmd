@@ -135,6 +135,7 @@ p1 <- p1 + geom_text(data = subset(dt_dailypattern, interval == maxint$interval[
                       aes(x = interval,y = steps, hjust = -0.01
                           , label = paste("max = ",dailymax, "steps for interval", maxint[1,1])))
 # Plot the plot
+p1 <- p1 + theme(plot.title = element_text(lineheight=.8, face="bold"))
 p1
 ```
 
@@ -148,28 +149,35 @@ The interval which contains the maximum average steps per day, is `r maxint$inte
 #             without missing values.
 #             Missing observations, if any, for date and interval are removed.
 
-#   1     Get the data
-setwd("C:/repos_github/coursera/repres/data")
-dx1 <- read.table("activity.csv", sep = ",", header = TRUE)
-dx1 <- data.table(dx1)
+#___4.1___Calculate and report the total number of missing values in the dataset 
+# A look at the data
+summary(dt_initial)
 
-#   1.2   Handle missing observations for date and interval
-allRows <- nrow(dx1)
-missingDates <- nrow(subset(dx1, !is.na(dx1$date)))
-missingInterval <- nrow(subset(dx1, !is.na(dx1$interval)))
+# Total number of missing values
+missingTotal <- sum(sapply(dt_initial, function(x) sum(is.na(x))))
 
-#___2___Handle missing observations for steps
-missingSteps <- nrow(subset(dx1, !is.na(dx1$steps)))
 
-#___2.1____Find average steps per day for each interval
-dx3 <- subset(dx1, !is.na(dx1$steps))
+#___4.2___Devise a strategy for filling in all of the missing values in the dataset
+#         There are a total of 2304 missing values in the original dataset, 
+#         all of which are missing observations for steps for given dates and intervals.
+#         The missing values will be replaced by the average number of steps for the according interval
+
+#___4.3___Replace missing values in dt_imputed with values in dt_avgsteps
+#         There are surely many ways to do this, perhaps most efficiently in dplyr.
+#         I'm going to brute force the whole process using a nested For Loop.
+#         The following code loops through the table dt_imputed.
+#         For each missing value, the code loops through the table dt_avgsteps, finds
+#         the corresponding step count, and writes it to the table dt_imputed.
+
+# Make a data table in which missing values will be raplaced.
+dt_imputed <- dt_initialNoNa
+
+# Make a data table that contains daily averages for all intervals
 dt_avgsteps <- data.table(sqldf("SELECT interval, avg(steps) as steps 
-        FROM dt1
+        FROM dt_initialNoNa
         Group by interval"))
 
-#___2.2___Replace missing values in dx4 with values in dt_avgsteps
-dt_missing <- dx1
-
+# Brute Force For Loop
 i <- 1
 j <- 1
 nmiss <- 0
@@ -211,7 +219,9 @@ write.table(dt_nonmissing, "imputedData.csv", row.names = FALSE)
 
 ```
 
-A total of `r nmiss` missing observations for steps in the original dataset have been replaced with the average number of steps for the corresponding category. The sum of steps added to the original dataset is 85128.
+There are a total of 2304 missing values in the original dataset, all of which are missing observations for steps for given dates and intervals.
+
+ The sum of steps added to the original dataset is 85128.
 Below is a histogram showing the distribution of steps after missing values have been imputed.
 
 ### Analysis part 4 - New histogram after accounting for missing values
