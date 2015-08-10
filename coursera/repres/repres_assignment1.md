@@ -5,35 +5,13 @@ output: html_document
 fig_caption: no
 ---
 
-```{r Settings, echo = FALSE, eval = TRUE, results = "hide", warning = FALSE, message = FALSE}
-rm(list=ls())
 
-# Table settings
-# \captionsetup[table]{labelformat=empty}
-
-# List loaded packages
-# (.packages())
-
-# Packages loaded
-pck_loaded <- (.packages())
-
-# Packages to load
-pck_toload <- c('ggplot2', 'mvtnorm', 'data.table', 'sqldf', 'stargazer', 'xtable')
-
-# Load packages
-for(i in 1:length(pck_toload)) {
-   if (!pck_toload[i] %in% pck_loaded)
-    print(pck_toload[i])
-    library(pck_toload[i], character.only = TRUE)
-}
-
-```
 
 
 
 ### Getting the data
-```{r Data_1, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE}
 
+```r
 # Load the data
 setwd("C:/repos_github/coursera/repres/data")
 dt1 <- read.table("activity.csv", sep = ",", header = TRUE)
@@ -51,8 +29,8 @@ remove(dt2)
 ```
 
 ### Analysis part 1 - Histogram
-```{r Analysis_1, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
+```r
 # Number of steps per day, data.table
 dt2 <- dt1[,.(steps.sum = sum(steps)),by=date]
 
@@ -75,17 +53,21 @@ h1 <- h1 + theme_classic()
 h1 <- h1 + ggtitle("Total number of steps per day") + xlab("steps")
 h1 <- h1 + ylim(0, 14)
 plot(h1)
-setwd("C:/repos_github/coursera/repres")
-#ggsave(filename = "Histogram Number of Steps.pdf", plot = h1)
-
 ```
 
-The average number of steps taken per day, without removing missing values, is `r nsteps`. The mean and median for the same category is 10788.19  and 10765.
+![plot of chunk Analysis_1](figure/Analysis_1-1.png) 
+
+```r
+setwd("C:/repos_github/coursera/repres")
+#ggsave(filename = "Histogram Number of Steps.pdf", plot = h1)
+```
+
+The average number of steps taken per day, without removing missing values, is 570608. The mean and median for the same category is 10788.19  and 10765.
 
 
 ### Analysis part 2 - Daily pattern
-```{r Analysis_2, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
+```r
 #   1   Average number of steps taken, averaged across all days
 #   1.1 Data
 dt3 <- sqldf("SELECT interval, avg(steps) as steps 
@@ -103,23 +85,33 @@ p1 <- ggplot(dt4, aes((interval), steps)) + geom_line(colour = "blue") + theme_c
 p2 <- ggplot(dt4, aes((idx1), steps)) + geom_line(colour = "blue") + theme_classic() + 
       ggtitle("Daily pattern by 5 minute interval") + xlab("interval")
 p2
+```
 
+![plot of chunk Analysis_2](figure/Analysis_2-1.png) 
+
+```r
 #   2   Which 5 minute interval has the max number of steps?
 maxsteps = max(dt4$steps)
 maxint <- sqldf("SELECT interval, max(steps)
         FROM dt4")
 maxint$interval[1]
+```
 
+```
+## [1] 835
+```
+
+```r
 #ggsave(filename = "Daily pattern.pdf", plot = p1)
 ```
 
-The interval which contains the maximum average steps per day, is `r maxint$interval[1]`.
+The interval which contains the maximum average steps per day, is 835.
 
 
 
 ### Analysis part 3 - Missing values
-```{r Analysis_3, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
+```r
 # OBJECTIVE:  Replace missing step data for all intervals with
 #             average number of stepds per day for those observations
 #             without missing values.
@@ -155,6 +147,13 @@ themissing <- nrow(subset(dx1, is.na(dx1$steps)))
 dt_nonmissing <- dt_missing
 themissing <- nrow(subset(dx1, is.na(dt_nonmissing$steps)))
 themissing
+```
+
+```
+## [1] 2304
+```
+
+```r
 fakesteps <- 0
 for(i in 1:length(dt_missing$steps)) {
   #print(dt_avgsteps$steps[i])
@@ -174,10 +173,38 @@ for(i in 1:length(dt_missing$steps)) {
   }
 }
 i
+```
+
+```
+## [1] 17568
+```
+
+```r
 nmiss
+```
+
+```
+## [1] 2304
+```
+
+```r
 themissing <- nrow(subset(dx1, is.na(dt_nonmissing$steps)))
 themissing
+```
+
+```
+## [1] 0
+```
+
+```r
 fakesteps
+```
+
+```
+## [1] 85128
+```
+
+```r
 missmix <- data.table(dt_missing, dt_nonmissing$steps)
 
 #___2.3___Store the results
@@ -185,15 +212,14 @@ setwd("C:/repos_github/coursera/repres/data")
 write.table(dt_nonmissing, "imputedData.csv", row.names = FALSE)
 #remove(nonmissing)
 #nonmissing <- data.table(read.table("imputedData.csv", sep = " ", header = TRUE))
-
 ```
 
-A total of `r nmiss` missing observations for steps in the original dataset have been replaced with the average number of steps for the corresponding category. The sum of steps added to the original dataset is 85128.
+A total of 2304 missing observations for steps in the original dataset have been replaced with the average number of steps for the corresponding category. The sum of steps added to the original dataset is 85128.
 Below is a histogram showing the distribution of steps after missing values have been imputed.
 
 ### Analysis part 4 - New histogram after accounting for missing values
-```{r Analysis_4, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
+```r
 #   1     The data
 
 dt5 <- data.table(sqldf("SELECT sum(steps) as steps, date 
@@ -212,15 +238,55 @@ h1 <- h1 + theme_classic()
 h1 <- h1 + ggtitle("Total number of steps per day") + xlab("steps")
 h1 <- h1 + ylim(0, 14)
 plot(h1)
-setwd("C:/repos_github/coursera/repres")
-ggsave(filename = "Histogram Number of Steps no missing values.pdf", plot = h1)
-
-
 ```
 
-### Final touch
-```{r final, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
+![plot of chunk Analysis_4](figure/Analysis_4-1.png) 
 
-#___1.0___  Make md file
-knit('repres_assignment1.Rmd')
+```r
+setwd("C:/repos_github/coursera/repres")
+ggsave(filename = "Histogram Number of Steps no missing values.pdf", plot = h1)
+```
+
+![plot of chunk Analysis_4](figure/Analysis_4-2.png) 
+
+### Analysis part 4 - New histogram showing the difference of the two prioe histograms
+
+```r
+#   1     The data
+dt6 <- dt_missing
+dt6$steps[is.na(dt6$steps)] <- 0
+
+stepdiff <- dt_nonmissing$steps - dt6$steps
+dt7 <- data.table(dt6, stepdiff)
+
+dt8 <- data.table(sqldf("SELECT sum(stepdiff) as stepdiff, date 
+        FROM dt7
+        Group by date"))
+
+# Number of steps per day, calculations
+nsteps_dt8 <- sum(dt8$steps)
+avgsteps_dt8 <- mean(dt8$steps)
+medsteps_dt8 <- median(dt8$steps)
+
+
+# Histogram of number of steps per day
+h1 <- ggplot(data=dt8, aes(dt8$stepdiff)) + geom_histogram(colour = "blue", fill = "grey")
+h1 <- h1 + theme_classic()
+h1 <- h1 + ggtitle("Total number of steps per day") + xlab("steps")
+h1 <- h1 + ylim(-14, 14)
+plot(h1)
+```
+
+![plot of chunk Analysis_5](figure/Analysis_5-1.png) 
+
+```r
+setwd("C:/repos_github/coursera/repres")
+ggsave(filename = "Histogram Number of Steps no missing values.pdf", plot = h1)
+```
+
+![plot of chunk Analysis_5](figure/Analysis_5-2.png) 
+
+```r
+library(knitr)
+# knit2html("repres_assignment1.Rmd","repres_assignment1.html")
 ```
