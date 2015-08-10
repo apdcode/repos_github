@@ -7,6 +7,8 @@ fig_caption: no
 
 ### R settings and packages
 ```{r Settings, echo = FALSE, eval = TRUE, results = "hide", warning = FALSE, message = FALSE}
+
+#___0.1___Clear workspace
 rm(list=ls())
 
 # Table settings
@@ -15,6 +17,7 @@ rm(list=ls())
 # List loaded packages
 # (.packages())
 
+#___0.2___Load packages
 # Packages loaded
 pck_loaded <- (.packages())
 
@@ -27,98 +30,115 @@ for(i in 1:length(pck_toload)) {
     print(pck_toload[i])
     library(pck_toload[i], character.only = TRUE)
 }
-
+remove(i)
 ```
-
-
 
 ### 1 - Loading and preprocessing the data
 ```{r Data_1, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE}
 
 #___1.1___Load the data
 setwd("C:/repos_github/coursera/repres/data")
-dt1 <- read.table("activity.csv", sep = ",", header = TRUE)
-dt1 <- data.table(dt1)
-#names(dt1)
-#length(names(dt1))
+dt_initial <- data.table(read.table("activity.csv", sep = ",", header = TRUE))
 
 #___1.2___Process/transform the data into a format suitable for the analysis
 #         For this par of the assignment, only complete cases of the dataset is used
 #         In other words, all missing values for all columns are removed.
-dt2 <- dt1[complete.cases(dt1),]
+#         Note, however, that the assigment requires quite a bit more data transforming, 
+#         but this will be done at the appropriate parts of the assignment to show the work flow.
+dt_initialNoNa <- dt1[complete.cases(dt1),]
 
 # Rows with missing data removed
-naRemoved <- nrow(dt1) - nrow(dt2)
-dt1 <- dt2
-remove(dt2)
+naRemoved <- nrow(dt_initial) - nrow(dt_initialNoNa)
+remove(dt1)
 ```
 
 ### 2 - What is the mean total number of steps taken per day?
 ```{r Analysis_1, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
-
+#___2.1___Calculate the total number of steps taken per day
+#         For the total number of steps per day, and the corresponding histogram,
+#         it is convenient to transform the data into showing unique dates in the date column.
+#         This way, total steps for all time intervals are displayed for each day in
+#         the datatable dt_dailysteps.
+#         There are several ways you can do this. The package data.table has several methods,
+#         but mostly I use and sql package for R called sqldf.
 
 # Number of steps per day using data.table
-dt2 <- dt1[,.(steps.sum = sum(steps)),by=date]
+dt_dailystepsDT <- dt_initialNoNa[,.(steps.sum = sum(steps)),by=date]
 
 # Number of steps per day using sqldf
-dt2s <- sqldf("SELECT sum(steps), date 
-        FROM dt1
+dt_dailysteps <- sqldf("SELECT sum(steps), date 
+        FROM dt_initialNoNa
         Group by date")
+remove(dt_dailystepsDT)
 
-# Number of steps per day, calculations
-nsteps <- sum(dt2$steps)
-avgsteps <- mean(dt2$steps.sum)
-medsteps <- median(dt2$steps.sum)
-
-
-# Histogram of number of steps per day
-h1 <- ggplot(data=dt2, aes(dt2$steps.sum)) + geom_histogram(colour = "blue", fill = "grey")
+#___2.2___Make a histogram of number of steps taken each day
+h1 <- ggplot(data=dt_dailysteps, aes(dt_dailysteps$steps.sum)) + geom_histogram(colour = "blue", fill = "grey")
 h1 <- h1 + theme_classic()
 h1 <- h1 + ggtitle("Total number of steps per day") + xlab("steps")
 h1 <- h1 + ylim(0, 14)
 plot(h1)
-setwd("C:/repos_github/coursera/repres")
+#setwd("C:/repos_github/coursera/repres")
 #ggsave(filename = "Histogram Number of Steps.pdf", plot = h1)
+
+#___2.3___Calculate and report the mean and median of the total number of steps taken per day
+nsteps <- sum(dt_dailysteps$steps)
+avgsteps <- mean(dt_dailysteps$steps.sum)
+medsteps <- median(dt_dailysteps$steps.sum)
+
 
 ```
 
 The average number of steps taken per day, without removing missing values, is `r nsteps`. The mean and median for the same category is 10788.19  and 10765.
 
-
-### Analysis part 2 - Daily pattern
+### 3 - What is the average daily pattern?
 ```{r Analysis_2, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
-#   1   Average number of steps taken, averaged across all days
-#   1.1 Data
-dt3 <- sqldf("SELECT interval, avg(steps) as steps 
-        FROM dt1
+#___3.1___Make a time series plot  of the 5 minute intervals averaged accross all days.
+#         Again, it is convenent to transform the original data.
+#         Here, the data is stored as an average for each interval accross all observed days
+#         in tha data table dt_dailypattern.
+
+# Data transformation
+dt_dailypattern <- sqldf("SELECT interval, avg(steps) as steps 
+        FROM dt_initialNoNa
         Group by interval")
 
-idx1 <- 1:nrow(dt3)
-dt4 <- data.table(dt3, idx1)
+# The next step adds an index to dt_dailypattern for charting purposes.
+# Using the time intervals on a continuos x-axis results in an uneven
+# time series due to the jumps between, for example, 955 and 1000.
+# Using an index gives a smoother line, but it would also be convenient to change the x-axis notation.
+# I'm doing both.
 
-#   1.2 Plot
-p1 <- ggplot(dt4, aes((interval), steps)) + geom_line(colour = "blue") + theme_classic() + 
+idx1 <- 1:nrow(dt_dailypattern)
+dt_dailypattern <- data.table(dt_dailypattern, idx1)
+
+# The plot, step 1
+p1 <- ggplot(dt_dailypattern, aes((interval), steps)) + geom_line(colour = "blue") + theme_classic() + 
       ggtitle("Daily pattern by 5 minute interval") + xlab("interval")
-#p1
 
-p2 <- ggplot(dt4, aes((idx1), steps)) + geom_line(colour = "blue") + theme_classic() + 
-      ggtitle("Daily pattern by 5 minute interval") + xlab("interval")
-p2
+#___3.2___Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-#   2   Which 5 minute interval has the max number of steps?
-maxsteps = max(dt4$steps)
+# Find interval with max steps
+maxsteps = max(dt_dailypattern$steps)
+
+# Look up the corresponding interval for the max number of steps
 maxint <- sqldf("SELECT interval, max(steps)
-        FROM dt4")
-maxint$interval[1]
+        FROM dt_dailypattern")
 
-#ggsave(filename = "Daily pattern.pdf", plot = p1)
+dailymax <- maxint[1,2]
+
+# The plot step 2 - Add a point in the plot indicating the interval with max number of steps and plot it.
+p1 <- p1 + geom_point(data = subset(dt_dailypattern, interval == maxint$interval[1]),
+                      colour = "red")
+p1 <- p1 + geom_text(data = subset(dt_dailypattern, interval == maxint$interval[1]),
+                      aes(x = interval,y = steps, hjust = -0.01
+                          , label = paste("max = ",dailymax, "steps for interval", maxint[1,1])))
+# Plot the plot
+p1
 ```
 
 The interval which contains the maximum average steps per day, is `r maxint$interval[1]`.
-
-
 
 ### Analysis part 3 - Missing values
 ```{r Analysis_3, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
