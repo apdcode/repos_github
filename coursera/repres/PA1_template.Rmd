@@ -272,42 +272,34 @@ plot(h2)
 #         "weekday" and "weekend" indicating whether a given date 
 #         is a weekday or weekend day.
 
-factor_wday <- 1:length(dt_dailysteps$date)
+# Make variables for factor categories
+factor_wday <-1:length(dt_dailysteps$date)
 factor_wend <- 1:length(dt_dailysteps$date)
 
-Sys.setlocale("LC_TIME", "English")
-
-weekdays(as.Date(dt_dailysteps$date[1]), abbreviate = FALSE)
-
-wday <- c("Monday", "Tuesday", "Dednesday", "Thursday", "Friday")
+# Factor categories
+wday <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 wend <- c("Saturday", "Sunday")
 
-cday <- weekdays(as.Date(dt_dailysteps$date[1]))
-cday <- "Sunday"
+# Change regional settings to match the English language.
+Sys.setlocale("LC_TIME", "English")
 
-i <- 1
-for(i in 1:length(factor_wday)) {
+# Distribute factor categories
+for(i in 1:length(dt_dailysteps$date)) {
+    cday <- weekdays(as.Date(dt_dailysteps$date[i]))
     if (cday %in% wday) {
         factor_wday[i] <- 1
-        factor_swnd[i] <- 0
+        factor_wend[i] <- 0
       }else{
         factor_wday[i] <- 0
-        factor_swnd[i] <- 1
+        factor_wend[i] <- 1
     }
 }
 
+# Add the factor variables to dt_avgsteps in a new table
+dt_dailysteps2 <- data.table(dt_dailysteps, factor_wday, factor_wend)
 
-for(i in 1:length(pck_toload)) {
-   if (!pck_toload[i] %in% pck_loaded)
-    print(pck_toload[i])
-    library(pck_toload[i], character.only = TRUE)
-   
-}
-
+# Reset regional settings
 Sys.setlocale("LC_TIME", "Norwegian")
-
-
-
 
 
 ```
