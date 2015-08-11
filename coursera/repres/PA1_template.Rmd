@@ -273,12 +273,10 @@ plot(h2)
 #         is a weekday or weekend day.
 
 # Make variables for factor categories
-factor_wday <-1:length(dt_dailysteps$date)
-factor_wend <- 1:length(dt_dailysteps$date)
+dayofweek <-1:length(dt_dailysteps$date)
 
 # Factor categories
 wday <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
-wend <- c("Saturday", "Sunday")
 
 # Change regional settings to match the English language.
 Sys.setlocale("LC_TIME", "English")
@@ -287,19 +285,25 @@ Sys.setlocale("LC_TIME", "English")
 for(i in 1:length(dt_dailysteps$date)) {
     cday <- weekdays(as.Date(dt_dailysteps$date[i]))
     if (cday %in% wday) {
-        factor_wday[i] <- 1
-        factor_wend[i] <- 0
-      }else{
-        factor_wday[i] <- 0
-        factor_wend[i] <- 1
+        dayofweek[i] <- "weekday"
+    }else{
+        dayofweek[i] <- "weekend"
     }
 }
 
 # Add the factor variables to dt_avgsteps in a new table
-dt_dailysteps2 <- data.table(dt_dailysteps, factor_wday, factor_wend)
+dt_dailysteps2 <- data.table(dt_dailysteps, dayofweek)
 
 # Reset regional settings
 Sys.setlocale("LC_TIME", "Norwegian")
+
+
+px3 <- ggplot(mtcars, aes(mpg, wt)) + geom_point()
+px3
+
+px3 <- px3 + facet_grid(cyl ~ .)
+
+p3 <- ggplot(dt_dailysteps2, aes(mpg, wt)) + geom_point()
 
 
 ```
