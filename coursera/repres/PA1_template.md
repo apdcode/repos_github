@@ -16,13 +16,16 @@ setwd("C:/repos_github/coursera/repres/data")
 dt_initial <- data.table(read.table("activity.csv", sep = ",", header = TRUE))
 
 #___1.2___Process/transform the data into a format suitable for the analysis
-#         For this par of the assignment, only complete cases of the dataset is used
+#         For this part of the assignment, only complete cases of the dataset is used
 #         In other words, all missing values for all columns are removed.
 #         Note, however, that the assigment requires quite a bit more data transforming, 
-#         but this will be done at the appropriate parts of the assignment to show the work flow.
+#         but this will be done at the appropriate parts of the assignment to 
+#         show the work flow.
+
+# Remove all observations with missing data
 dt_initialNoNa <- dt_initial[complete.cases(dt_initial),]
 
-# Rows with missing data removedc
+# Rows with missing data removed
 naRemoved <- nrow(dt_initial) - nrow(dt_initialNoNa)
 ```
 
@@ -31,11 +34,13 @@ naRemoved <- nrow(dt_initial) - nrow(dt_initialNoNa)
 ```r
 #___2.1___Calculate the total number of steps taken per day
 #         For the total number of steps per day, and the corresponding histogram,
-#         it is convenient to transform the data into showing unique dates in the date column.
+#         it is convenient to transform the data into 
+#         showing unique dates in the date column.
 #         This way, total steps for all time intervals are displayed for each day in
 #         the datatable dt_dailysteps.
-#         There are several ways you can do this. The package data.table has several methods,
-#         but mostly I use and sql package for R called sqldf.
+#         There are several ways you can do this. 
+#         The package data.table has several methods,
+#         but mostly I use an sql package for R called sqldf.
 
 # Number of steps per day using data.table
 dt_dailystepsDT <- dt_initialNoNa[,.(steps.sum = sum(steps)),by=date]
@@ -47,7 +52,8 @@ dt_dailysteps <- sqldf("SELECT sum(steps) as stepsum, date
 remove(dt_dailystepsDT)
 
 #___2.2___Make a histogram of number of steps taken each day
-h1 <- ggplot(data=dt_dailysteps, aes(dt_dailysteps$stepsum)) + geom_histogram(colour = "blue", fill = "grey")
+h1 <- ggplot(data=dt_dailysteps, aes(dt_dailysteps$stepsum)) 
+h1 <- h1 + geom_histogram(colour = "blue", fill = "grey")
 h1 <- h1 + theme_classic()
 h1 <- h1 + ggtitle("Total number of steps per day") + xlab("steps")
 h1 <- h1 + ylim(0, 14)
@@ -60,7 +66,8 @@ plot(h1)
 #setwd("C:/repos_github/coursera/repres")
 #ggsave(filename = "Histogram Number of Steps.pdf", plot = h1)
 
-#___2.3___Calculate and report the mean and median of the total number of steps taken per day
+#___2.3___Calculate and report the mean and median 
+#         of the total number of steps taken per day
 nsteps <- sum(dt_dailysteps$steps)
 avgsteps <- mean(dt_dailysteps$stepsum)
 medsteps <- median(dt_dailysteps$stepsum)
@@ -73,7 +80,8 @@ The average number of steps taken per day, without removing missing values, is 5
 ```r
 #___3.1___Make a time series plot  of the 5 minute intervals averaged accross all days.
 #         Again, it is convenent to transform the original data.
-#         Here, the data is stored as an average for each interval accross all observed days
+#         Here, the data is stored as an average for each interval 
+#         accross all observed days
 #         in tha data table dt_dailypattern.
 
 # Data transformation
@@ -84,17 +92,17 @@ dt_dailypattern <- sqldf("SELECT interval, avg(steps) as steps
 # The next step adds an index to dt_dailypattern for charting purposes.
 # Using the time intervals on a continuos x-axis results in an uneven
 # time series due to the jumps between, for example, 955 and 1000.
-# Using an index gives a smoother line, but it would also be convenient to change the x-axis notation.
-# I'm doing both.
 
 idx1 <- 1:nrow(dt_dailypattern)
 dt_dailypattern <- data.table(dt_dailypattern, idx1)
 
 # The plot, step 1
-p1 <- ggplot(dt_dailypattern, aes((interval), steps)) + geom_line(colour = "blue") + theme_classic() + 
+p1 <- ggplot(dt_dailypattern, aes((interval), steps))
+p1 <- p1 + geom_line(colour = "blue") + theme_classic() + 
       ggtitle("Daily pattern by 5 minute interval") + xlab("interval")
 
-#___3.2___Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+#___3.2___Which 5-minute interval, on average across all the days in the dataset, 
+#         contains the maximum number of steps?
 
 # Find interval with max steps
 maxsteps = max(dt_dailypattern$steps)
@@ -105,12 +113,14 @@ maxint <- sqldf("SELECT interval, max(steps)
 
 dailymax <- maxint[1,2]
 
-# The plot step 2 - Add a point in the plot indicating the interval with max number of steps and plot it.
+# The plot step 2 - Add a point in the plot indicating the interval 
+#                   with max number of steps and plot it.
 p1 <- p1 + geom_point(data = subset(dt_dailypattern, interval == maxint$interval[1]),
                       colour = "red")
 p1 <- p1 + geom_text(data = subset(dt_dailypattern, interval == maxint$interval[1]),
                       aes(x = interval,y = steps, hjust = -0.01
-                          , label = paste("max = ",dailymax, "steps for interval", maxint[1,1])))
+                          , label = paste("max = ",dailymax, "steps for interval",
+                                          maxint[1,1])))
 # Plot the plot
 p1 <- p1 + theme(plot.title = element_text(lineheight=.8, face="bold"))
 p1
@@ -130,21 +140,8 @@ The interval which contains the maximum average steps per day, is 835.
 
 #___4.1___Calculate and report the total number of missing values in the dataset 
 # A look at the data
-summary(dt_initial)
-```
+# summary(dt_initial)
 
-```
-##      steps                date          interval     
-##  Min.   :  0.00   2012-10-01:  288   Min.   :   0.0  
-##  1st Qu.:  0.00   2012-10-02:  288   1st Qu.: 588.8  
-##  Median :  0.00   2012-10-03:  288   Median :1177.5  
-##  Mean   : 37.38   2012-10-04:  288   Mean   :1177.5  
-##  3rd Qu.: 12.00   2012-10-05:  288   3rd Qu.:1766.2  
-##  Max.   :806.00   2012-10-06:  288   Max.   :2355.0  
-##  NA's   :2304     (Other)   :15840
-```
-
-```r
 # Total number of missing values
 missingTotal <- sum(sapply(dt_initial, function(x) sum(is.na(x))))
 
@@ -152,9 +149,11 @@ missingTotal <- sum(sapply(dt_initial, function(x) sum(is.na(x))))
 #___4.2___Devise a strategy for filling in all of the missing values in the dataset
 #         There are a total of 2304 missing values in the original dataset, 
 #         all of which are missing observations for steps for given dates and intervals.
-#         The missing values will be replaced by the average number of steps for the according interval
+#         The missing values will be replaced by the average number of steps
+#         for the according interval
 
-#___4.3___Create a new dataset that is equal to the original dataset but with the missing data filled in.
+#___4.3___Create a new dataset that is equal to the original dataset 
+#         but with the missing data filled in.
 #         There are surely many ways to do this, perhaps most efficiently in dplyr.
 #         I'm going to brute force the whole process using a nested For Loop.
 #         The following code loops through the table dt_imputed.
@@ -197,21 +196,10 @@ for(i in 1:length(dt_initial$steps)) {
 # themissing
 # fakesteps
 # missmix <- data.table(dt_missing, dt_nonmissing$steps)
+
 # Look at the data
-head(dt_imputed)
-```
+# head(dt_imputed)
 
-```
-##    steps       date interval
-## 1:     1 2012-10-01        0
-## 2:     0 2012-10-01        5
-## 3:     0 2012-10-01       10
-## 4:     0 2012-10-01       15
-## 5:     0 2012-10-01       20
-## 6:     2 2012-10-01       25
-```
-
-```r
 setwd("C:/repos_github/coursera/repres/data")
 write.table(dt_imputed, "imputedData.csv", row.names = FALSE)
 #remove(nonmissing)
@@ -226,41 +214,17 @@ dt_dailysteps2 <- data.table(sqldf("SELECT sum(steps) as stepsum, date
         Group by date"))
 
 # Look at the data
-head(dt_dailysteps)
-```
+# head(dt_dailysteps)
+# head(dt_dailysteps2)
 
-```
-##   stepsum       date
-## 1     126 2012-10-02
-## 2   11352 2012-10-03
-## 3   12116 2012-10-04
-## 4   13294 2012-10-05
-## 5   15420 2012-10-06
-## 6   11015 2012-10-07
-```
-
-```r
-head(dt_dailysteps2)
-```
-
-```
-##    stepsum       date
-## 1:   10641 2012-10-01
-## 2:     126 2012-10-02
-## 3:   11352 2012-10-03
-## 4:   12116 2012-10-04
-## 5:   13294 2012-10-05
-## 6:   15420 2012-10-06
-```
-
-```r
 # Number of steps per day, calculations
 nstepsNoNa <- sum(dt_dailysteps2$steps)
 avgsteNoNa <- mean(dt_dailysteps2$steps)
 medstepsNoNa <- median(dt_dailysteps2$steps)
 
 # Histogram of number of steps per day
-h2 <- ggplot(data=dt_dailysteps2, aes(dt_dailysteps2$steps)) + geom_histogram(colour = "blue", fill = "grey")
+h2 <- ggplot(data=dt_dailysteps2, aes(dt_dailysteps2$steps))
+h2 <- h2 + geom_histogram(colour = "blue", fill = "grey")
 h2 <- h2 + theme_classic()
 h2 <- h2 + ggtitle("Total number of steps per day") + xlab("steps")
 h2 <- h2 + ylim(0, 14)
@@ -271,7 +235,8 @@ ggsave(filename = "Histogram Number of Steps no missing values.pdf", plot = h1)
 
 ![plot of chunk Analysis_3](figure/Analysis_3-1.png) 
 
-There are a total of 2304 missing values in the original dataset, all of which are missing observations for steps for given dates and intervals.
+There are a total of 2304 missing values in the original dataset, 
+all of which are missing observations for steps for given dates and intervals.
 
 The sum of steps added to the original dataset is 85128.
 Below is a histogram showing the distribution of steps after missing values have been imputed.
@@ -282,15 +247,67 @@ plot(h2)
 
 ![plot of chunk Analysis_31](figure/Analysis_31-1.png) 
 
+### Part 5 - Are there differences in activity patterns between weekdays and weekends?
+
+```r
+#___5.1___Create a new factor variable in the dataset with two levels - 
+#         "weekday" and "weekend" indicating whether a given date 
+#         is a weekday or weekend day.
+
+# Make variables for factor categories
+dayofweek <-1:length(dt_dailysteps$date)
+
+# Factor categories
+wday <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
+
+# Change regional settings to match the English language.
+Sys.setlocale("LC_TIME", "English")
+```
+
+```
+## [1] "English_United States.1252"
+```
+
+```r
+# Distribute factor categories
+for(i in 1:length(dt_dailysteps$date)) {
+    cday <- weekdays(as.Date(dt_dailysteps$date[i]))
+    if (cday %in% wday) {
+        dayofweek[i] <- "weekday"
+    }else{
+        dayofweek[i] <- "weekend"
+    }
+}
+
+# Add the factor variables to dt_avgsteps in a new table
+dt_dailysteps2 <- data.table(dt_dailysteps, dayofweek)
+
+# Reset regional settings
+Sys.setlocale("LC_TIME", "Norwegian")
+```
+
+```
+## [1] "Norwegian (Bokmål)_Norway.1252"
+```
+
+```r
+px3 <- ggplot(mtcars, aes(mpg, wt)) + geom_point()
+px3
+```
+
+![plot of chunk Analysis_5](figure/Analysis_5-1.png) 
+
+```r
+px3 <- px3 + facet_grid(cyl ~ .)
+
+p3 <- ggplot(dt_dailysteps2, aes(mpg, wt)) + geom_point()
+```
 
 ### Final touch
 
 ```r
 #___1.0___  Make md file
-library(knitr)
-knit('PA1_template.Rmd')
-```
-
-```
-## Error in parse_block(g, patterns): duplicate label 'Settingz'
+#setwd("C:/repos_github/coursera/repres")
+#library(knitr)
+#knit('PA1_template.Rmd')
 ```

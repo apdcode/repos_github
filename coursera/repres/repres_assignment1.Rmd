@@ -1,7 +1,7 @@
 ---
 title: "The Quantified Self"
 header-includes: \usepackage{caption}
-output: html_document
+output: pdf_document
 fig_caption: no
 ---
 
@@ -222,5 +222,5 @@ ggsave(filename = "Histogram Number of Steps no missing values.pdf", plot = h1)
 ```{r final, echo = TRUE, eval = TRUE, results = "show", warning = FALSE, message = FALSE, fig.width = 12, fig.height = 8}
 
 #___1.0___  Make md file
-knit('repres_assignment1.Rmd')
+# knit('repres_assignment1.Rmd')
 ```
