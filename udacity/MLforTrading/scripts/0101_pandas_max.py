@@ -9,6 +9,8 @@ import os
 print (os.getcwd())
 
 os.chdir('C:/repos_github/udacity/MLforTrading/data')
+os.chdir('C:/repos/research/data_misc')
+os.listdir(os.getcwd())
 
 # Display first columns of df
 def get_max_close(symbol):
@@ -17,9 +19,14 @@ def get_max_close(symbol):
         Note: Data is stored in file Coint01.txt
     """
     
-    df = pd.read_csv('coint.txt').format(symbol)
-    return df['SystemPris'].max()
+    df = pd.read_csv('{}.txt'.format(symbol))
+    return df['Close'].max()
 
 
 def test_run():
-    for symbol in []
+    for symbol in ['ENOYZ7', 'F1BYF7']:
+        print ('Max close')
+        print (symbol, get_max_close(symbol))
+        #print (symbol)
+
+test_run()
