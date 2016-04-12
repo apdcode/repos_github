@@ -24,7 +24,7 @@ def get_max_close(symbol):
 
 
 def test_run():
-    for symbol in ['ENOYZ7', 'F1BYF7']:
+    for symbol in ['ENOYZ7','F1BYF7']:
         print ('Max close')
         print (symbol, get_max_close(symbol))
         #print (symbol)
