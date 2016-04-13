@@ -46,7 +46,7 @@ def test_run_get_mean_volume():
         
 test_run_get_mean_volume()
 
-# Plotting
+# Plotting - single series
 def test_run_plot1():
     df = pd.read_csv('ENOYZ7.txt')
     #print(df['Close'])
@@ -54,3 +54,12 @@ def test_run_plot1():
     plt.show()  # must be called to show plots
 
 test_run_plot1()
+
+# Plotting - multiple series
+def test_run_plot2():
+    df = pd.read_csv('ENOYZ7.txt')
+    #print(df['Close'])
+    df[['Close', 'High']].plot()
+    plt.show()  # must be called to show plots
+
+test_run_plot2()
