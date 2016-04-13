@@ -23,10 +23,24 @@ def get_max_close(symbol):
     return df['Close'].max()
 
 
-def test_run():
+def test_run_get_max_close():
     for symbol in ['ENOYZ7','F1BYF7']:
         print ('Max close')
         print (symbol, get_max_close(symbol))
         #print (symbol)
 
-test_run()
+test_run_get_max_close()
+
+def get_mean_volume(symbol):
+    # spør etter high istedet for volume siden
+    # volume ikke er i datasettet.
+    df = pd.read_csv('{}.txt'.format(symbol))
+    return df['High'].mean()
+    
+        
+def test_run_get_mean_volume():
+    for symbol in ['ENOYZ7','F1BYF7']:
+        print ('mean high')
+        print (symbol, get_mean_volume(symbol))
+        
+test_run_get_mean_volume()
