@@ -35,12 +35,12 @@ def get_mean_volume(symbol):
     # spør etter high istedet for volume siden
     # volume ikke er i datasettet.
     df = pd.read_csv('{}.txt'.format(symbol))
-    return df['High'].mean()
+    return df['Volume'].mean()
     
         
 def test_run_get_mean_volume():
     for symbol in ['ENOYZ7','F1BYF7']:
-        print ('mean high')
+        print ('mean volume')
         print (symbol, get_mean_volume(symbol))
         
 test_run_get_mean_volume()
