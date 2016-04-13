@@ -26,13 +26,30 @@ def test_run_01_dfBuild():
     print(df1)
    
     # Read SPY data into temporary dataframe
-    dfSPY = pd.read_csv('data/spy.csv')
-    print("***Dataframe_2***:") 
-    print(dfSPY.head())   
+    # 1.    Inform read_csv function that the date column
+    #       should be used as index by using the index_col parameter
+    # 2.    Convert data paremeter in datafra to DATETIME INDEX objects
+    #       using parse_dates = True
+   
+    # First attempt
+    # dfSPY = pd.read_csv('data/spy.csv')
+   
+    # Second attempt
+    # dfSPY = pd.read_csv('data/spy.csv', index_col='Date', parse_dates = True)
+    
+    # Third version    
+    dfSPY = pd.read_csv('data/spy.csv', index_col='Date', 
+                        parse_dates = True, usecols = ['Date', 'Adj Close'])
+                        #na_values = ['nan'])
+    # print("***Dataframe_2***:") 
+    #print(dfSPY.head())   
 
     # Join the two dataframes using DataFrame.join()
     df1 = df1.join(dfSPY)    
-    print("***Dataframe_2***:")
-    print(df1)
+    # print("***Dataframe_2***:")
+        
+    # Drop NaN values
+    df1 = df1.dropna()
+    print(df1)    
     
 test_run_01_dfBuild()
