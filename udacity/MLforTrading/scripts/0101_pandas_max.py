@@ -6,6 +6,7 @@ This is a temporary script file.
 """
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
 print (os.getcwd())
 
 os.chdir('C:/repos_github/udacity/MLforTrading/data')
@@ -44,3 +45,12 @@ def test_run_get_mean_volume():
         print (symbol, get_mean_volume(symbol))
         
 test_run_get_mean_volume()
+
+# Plotting
+def test_run_plot1():
+    df = pd.read_csv('ENOYZ7.txt')
+    #print(df['Close'])
+    df['Close'].plot()
+    plt.show()  # must be called to show plots
+
+test_run_plot1()
