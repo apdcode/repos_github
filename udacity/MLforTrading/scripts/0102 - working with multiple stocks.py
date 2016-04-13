@@ -22,10 +22,10 @@ def test_run_01_dfBuild():
     
     # Create an empty dataframe
     df1 = pd.DataFrame(index=dates)
-    print("***Dataframe_1***:")
-    print(df1)
+    #print("***Dataframe_1***:")
+    #print(df1)
    
-    # Read SPY data into temporary dataframe
+    ''' 1 - Read SPY data into temporary dataframe'''
     # 1.    Inform read_csv function that the date column
     #       should be used as index by using the index_col parameter
     # 2.    Convert data paremeter in datafra to DATETIME INDEX objects
@@ -39,16 +39,29 @@ def test_run_01_dfBuild():
     
     # Third version    
     dfSPY = pd.read_csv('data/spy.csv', index_col='Date', 
-                        parse_dates = True, usecols = ['Date', 'Adj Close'])
-                        #na_values = ['nan'])
+                        parse_dates = True, usecols = ['Date', 'Adj Close'],
+                        na_values = ['nan'])
+    dfSPY = dfSPY.rename(columns={'Adj Close':'SPY'})                        
+                        
     # print("***Dataframe_2***:") 
     #print(dfSPY.head())   
 
     # Join the two dataframes using DataFrame.join()
-    df1 = df1.join(dfSPY)    
+    df1 = df1.join(dfSPY, how = 'inner')    
     # print("***Dataframe_2***:")
+    
+    ''' 2 - Read in more stocks'''
+    symbols = ['GOOG', 'IBM', 'GLD']    
+    for symbol in symbols:
+        df_temp = pd.read_csv('data/{}.csv'.format(symbol), index_col = 'Date',
+                              parse_dates = True, usecols = ['Date', 'Adj Close'],
+                                na_values =['nan'])
+        #rename to prevent crash
+        df_temp = df_temp.rename(columns={'Adj Close':symbol})
         
-    # Drop NaN values
+        df1=df1.join(df_temp)
+    
+    # Drop NaN values - Method 1
     df1 = df1.dropna()
     print(df1)    
     
