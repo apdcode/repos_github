@@ -41,7 +41,5 @@ def get_data(symbols, dates):
     return df
     
 symbols = ['GOOG', 'IBM', 'GLD']
-print (symbols)
-print (dates)
     
 get_data(symbols,  dates).head()
