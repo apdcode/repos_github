@@ -11,58 +11,37 @@ import os
 os.chdir('C:/repos_github/udacity/MLforTrading/')
 #os.chdir('C:/repos/research/data_misc')
 os.listdir(os.getcwd())
+start_date = '2010-01-22'
+end_date = '2010-01-26'
+dates = pd.date_range(start_date, end_date)
 
 
-def test_run_01_dfBuild():
-    # Define data range
-    start_date = '2010-01-22'
-    end_date = '2010-01-26'
-    dates = pd.date_range(start_date, end_date)
-    # print(dates[0])
-    
-    # Create an empty dataframe
-    df1 = pd.DataFrame(index=dates)
-    #print("***Dataframe_1***:")
-    #print(df1)
+def symbol_to_path(symbol, base_dir='data'):
+    """Return CSV file path given ticker symbol"""
+    return os.path.join(base_dir, "{}.csv".format(str(symbol)))
    
-    ''' 1 - Read SPY data into temporary dataframe'''
-    # 1.    Inform read_csv function that the date column
-    #       should be used as index by using the index_col parameter
-    # 2.    Convert data paremeter in datafra to DATETIME INDEX objects
-    #       using parse_dates = True
-   
-    # First attempt
-    # dfSPY = pd.read_csv('data/spy.csv')
-   
-    # Second attempt
-    # dfSPY = pd.read_csv('data/spy.csv', index_col='Date', parse_dates = True)
-    
-    # Third version    
-    dfSPY = pd.read_csv('data/spy.csv', index_col='Date', 
-                        parse_dates = True, usecols = ['Date', 'Adj Close'],
-                        na_values = ['nan'])
-    dfSPY = dfSPY.rename(columns={'Adj Close':'SPY'})                        
-                        
-    # print("***Dataframe_2***:") 
-    #print(dfSPY.head())   
-
-    # Join the two dataframes using DataFrame.join()
-    df1 = df1.join(dfSPY, how = 'inner')    
-    # print("***Dataframe_2***:")
-    
-    ''' 2 - Read in more stocks'''
-    symbols = ['GOOG', 'IBM', 'GLD']    
-    for symbol in symbols:
-        df_temp = pd.read_csv('data/{}.csv'.format(symbol), index_col = 'Date',
-                              parse_dates = True, usecols = ['Date', 'Adj Close'],
-                                na_values =['nan'])
-        #rename to prevent crash
-        df_temp = df_temp.rename(columns={'Adj Close':symbol})
+def get_data(symbols, dates):
+    """Read stock data (adjusted close) for given symbols for CSV files."""
+    df = pd.DataFrame(index = dates)
+    if 'SPY' not in symbols:    # add SPY for reference if absent
+        symbols.insert(0, 'SPY') 
         
-        df1=df1.join(df_temp)
+    for symbol in symbols:
+        print(symbol)
+        # Read and join data for each symbol
+        df_temp = pd.read_csv(symbol_to_path(symbol), index_col ='Date',
+                              parse_dates = True,
+                              usecols = ['Date', 'Adj Close'], na_values = ['nan'])
+        df_temp = df_temp.rename(columns = {'Adj Close': symbol})  
+            
+        df = df.join(df_temp)
+        if symbol == 'SPY': # drop dates where SPY did not trade
+           df = df.dropna(subset = ["SPY"])
+           
+    return df
     
-    # Drop NaN values - Method 1
-    df1 = df1.dropna()
-    print(df1)    
+symbols = ['GOOG', 'IBM', 'GLD']
+print (symbols)
+print (dates)
     
-test_run_01_dfBuild()
+get_data(symbols,  dates).head()
