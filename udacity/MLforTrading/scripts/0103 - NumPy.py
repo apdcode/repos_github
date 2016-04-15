@@ -31,14 +31,46 @@ def test_run():
 #   Array of 1s
     # print(np.ones((5,4), dtype=np.int_))
 
-    '''Lect_0103_07 - Generating random numbers'''
+    '''Lect_0103_09 - Generating random numbers'''
 #   Generate an array of randoms, uniformly sampled from [0.0, 1.0)
-    # print(np.random.random((8,4)))                                            # this is a tuple
-    # print(np.random.rand(8,4))                                                # this is not a tuple
+    # print(np.random.random((8,4))) # this is a tuple
+    # print(np.random.rand(8,4))# this is not a tuple
 
 #   Sample numbers from a Gaussian (normal) distribution
-    print(np.random.normal(size = (2,3))                                        # standard normal with mean = 0, sd = 1
+    # print(np.random.normal(size = (10,10))) # standard normal with mean = 0, sd = 1
     
+#   Now, change the mean and standard deviation
+    # print(np.random.normal(50,10, size = (10,10)))
+
+    '''Lect_0103_10 - Array Attributes'''
+    a = np.random.random((5,4)) # 5x4 array of random numbers
+    # print(a)
+    #print(a.shape)
+    #print(a.shape[0])
+    #print(a.shape[1])
+    #print(len(a.shape))
+    #print(a.size)
+    print(a.dtype)
+    
+    '''Lect_0103_11 - Operations on ndarrays'''
+#   Random seed
+    np.random.seed()
+    a = np.random.randint(0,10,size=(5,4))
+    #print("Array:\n\n\n ",a)
+
+#   Sum of all elements
+    #print("Sum of all elements:", a.sum())
+
+#   Iterate over rows, to compute sum of each column
+    #print("Sum of each column: ",a.sum(axis=0))
+
+#   Iterate over columns to compute sum of each row
+    #print("Sum of row: ", a.sum(axis=1))
+    
+#   Statistics: min, max, mean
+    print("Minimum of each column:\n", a.min(axis=0))
+    print("Maximum of each row:\n", a.max(axis=1))
+    print("Mean of all elements:\n", a.mean())
 
 # Run it
 if __name__ == "__main__":
