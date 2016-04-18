@@ -68,10 +68,26 @@ def test_run():
     #print("Sum of row: ", a.sum(axis=1))
     
 #   Statistics: min, max, mean
-    print("Minimum of each column:\n", a.min(axis=0))
-    print("Maximum of each row:\n", a.max(axis=1))
-    print("Mean of all elements:\n", a.mean())
+    #print("Minimum of each column:\n", a.min(axis=0))
+    #print("Maximum of each row:\n", a.max(axis=1))
+    #print("Mean of all elements:\n", a.mean())
 
+    '''QUIZ - Locate maximum value'''
+def get_max_index(a):
+        """Return the index of the maximum value in  given 1D array"""
+        # a = np.array([9,6,200,3,14,7,19], dtype =np.int32)        
+        return a.argmax()
+        
+
+def test_run_get_max_index():
+        a = np.array([9,600,2,3,14000,7,19], dtype =np.int32)
+        print("it runs")        
+        print(get_max_index(a))
+    
+    
+test_run_get_max_index()    
+    
+    
 # Run it
 if __name__ == "__main__":
     test_run()
