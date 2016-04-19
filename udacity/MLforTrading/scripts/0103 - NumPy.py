@@ -72,7 +72,7 @@ def test_run():
     #print("Maximum of each row:\n", a.max(axis=1))
     #print("Mean of all elements:\n", a.mean())
 
-    '''QUIZ - Locate maximum value'''
+    '''Lect_0103_12 - QUIZ - Locate maximum value'''
 def get_max_index(a):
         """Return the index of the maximum value in  given 1D array"""
         # a = np.array([9,6,200,3,14,7,19], dtype =np.int32)        
@@ -81,11 +81,11 @@ def get_max_index(a):
 
 def test_run_get_max_index():
         a = np.array([9,600,2,3,14000,7,19], dtype =np.int32)
-        print("it runs")        
-        print(get_max_index(a))
-    
-    
-test_run_get_max_index()    
+        #print("it runs")        
+        #print(get_max_index(a))
+# test_run_get_max_index()    
+        
+        '''Lect_0103_13 - Timing python operations'''       
     
     
 # Run it
