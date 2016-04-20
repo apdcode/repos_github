@@ -20,13 +20,26 @@ os.listdir(os.getcwd())
 
 '''0103_17 - Indexing an array with another array'''
 def test_run():
-    a = np.random.rand(5)
-    print("Array:\n", a)
+    #a = np.random.rand(5)
+    #print("Array:\n", a)
     # Accessing array using list of indices
-    indices = np.array([1,1,2,3])
-    print(a[indices])
+    #indices = np.array([1,1,2,3])
+    #print(a[indices])
        
-        
+    '''0103_17 - Indexing an array with another array'''
+    a = np.array([(20,25,10,23,26,32,10,5,0),(0,2,50,20,0,1,28,5,0)])
+    #a = np.array([(20,25,), (1,2)])
+    #print(a)
+    
+    # Calculating mean
+    mean = a.mean()
+    #print(mean)
+    
+    # masking
+    print(a[a<mean])
+    
+    a[a<mean] = mean
+    print(a)
     
 # Run it
 if __name__ == "__main__":
