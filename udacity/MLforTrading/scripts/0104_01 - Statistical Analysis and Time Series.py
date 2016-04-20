@@ -22,26 +22,7 @@ os.listdir(os.getcwd())
 def test_run():
    
     a = np.array([(1,2,3,4,5),(10,20,30,40,50)])
-    #print("Original array a:\n",a)
-    
-    # Multiply a by 2
-    #print("Multiply a by 2:\n",a*2)
 
-    # Division by 2
-    print("Division by 2:\n",a/2)
-    
-    # Integer Division by 2
-    print("Integer division by 2:\n",a//2)
-    
-    # How about mathemtic operations using two arrays
-    b = np.array([(100,200,300,400,500), (1,2,3,4,5)])
-    
-    # Add arrays a and b
-    print(a+b)    
-    
-    # What about matrix multiplication?
-    # Yes, there is funtionality through dot multiplication.
-    
 
 # Run it
 if __name__ == "__main__":
