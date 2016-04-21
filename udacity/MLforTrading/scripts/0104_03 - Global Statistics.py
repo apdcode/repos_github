@@ -43,16 +43,38 @@ def get_data(symbols, dates):
            
     return df
     
+    
+def plot_data(df, title ="Stock Prices"):
+    '''Plot stock price'''
+    ax = df.plot(title = title, fontsize = 10)
+    ax.set_xlabel("Date")    
+    ax.set_ylabel("Price")
+    #plt.show()
 
-'''0102_14 - More Slicing'''
+#def plot_selected(df, columns, start_index, end_index):
+#    """Plot the desired columns over index values given in the range."""
+#    plot_data(df.ix[start_index:end_index, columns], title ="Selected data")
+#
+#plot_selected()
 
+plot_data(df1)    
+    
+def normalize_data(df):
+    """Normalize stock prices using the first row of the data frame."""
+    
+    return df/df.ix[0,:]
+    
 def test_run():
     # Define a date range
     dates = pd.date_range(start_date, end_date)
 
     # Choose stock symbols
-    symbols = ['GOOG', 'IBM', 'GLD']
+    symbols = ['SPY', 'XOM', 'GOOG', 'GLD']
     
     # Get stock data    
     # slice by row range (dates) using DataFrame.ix[] selector
     df = get_data(symbols,  dates)
+    plot_data(df)
+    return df
+    
+df1 = test_run()
