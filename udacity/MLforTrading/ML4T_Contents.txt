@@ -1,7 +1,16 @@
+********************************************
 ***UDACITY - MACHINE LEARNING FOR TRADING***
-0104 - Statistical analysis
+********************************************
+
+***0104 - Statistical analysis***
+*********************************
 	0104_01 - Are you ready?
 	0104_02 - Lesson Outline
 	0104_03 - Global statistics
 	0104_04 - Compute global statistics
 	0104-05 - Rolling statistics
+	0104-06 - Which statistics to use?
+	0104_07 - Bollinger bands
+	0104_08 - Computing rolling statistics
+	0104_09 - Quiz - Calculate Bollinger Bands
+

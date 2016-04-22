@@ -57,15 +57,102 @@ def normalize_data(df):
     """Normalize stock prices using the first row of the data frame."""
     return df/df.ix[0,:]
 
+"""0104_04"""
 """Global statistcs"""
-df1 = normalize_data(get_data(symbols, dates))
-plot_data(df1)
-print(df1.mean(), '\n', '\n', df1.median(), '\n', '\n',df1.std())
+#df1 = normalize_data(get_data(symbols, dates))
+#plot_data(df1)
+#print(df1.mean(), '\n', '\n', df1.median(), '\n', '\n',df1.std())
 
+"""0104_05"""
+"""Rolling statistics"""
 
+"""0104_06"""
+"""Which statistics ot use?"""
 
+"""0104_07"""
+"""Bollinger Bands"""
+
+"""0104_08"""
+"""Computing rolling statistics"""
+def test_run_0104_08():
+    # Read Data
+    dates = pd.date_range('2012-01-01', '2012-12-31')
+    symbols = ['SPY']
+    df = get_data(symbols, dates)
+    
+    # Plot SPY data, retain matplotlib axis object
+    ax = df['SPY'].plot(title = 'SPY rolling mean', label = 'SPY')
+    
+    # Compute rolling mean using a 20-day window
+    rm_SPY1 = pd.rolling_mean(df['SPY'], window = 20)
+    rm_SPY2 = pd.rolling_mean(df['SPY'], window = 40)
+    rm_SPY3 = pd.rolling_mean(df['SPY'], window = 60)
+    #rm_SPY = pd.rolling_mean(df['SPY'], window = 40)
+    #rm_SPY = pd.rolling_mean(df['SPY'], window = 60)
+    
+    # Add rolling mean to same plot
+    rm_SPY1.plot(label='Rolling Mean', ax = ax)
+    rm_SPY2.plot(label='Rolling Mean', ax = ax)
+    rm_SPY3.plot(label='Rolling Mean', ax = ax)
+    
+    # Add axis labels and legend
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Price")
+    ax.legend(loc = 'upper left')
+    plt.show
+    
+"""0104_09"""
+"""Quiz - Calculate Bollinger Bands"""    
+
+def get_rolling_mean(values, window):
+    """Return rolling mean of given values, using specified window size."""    
+    
+    return pd.rolling_mean(values, window)    
+    
+def get_rolling_std(values, window):
+    """Return rolling standard deviation of given values, using specified window size."""
+    
+    return pd.rolling_std(values, window)
+
+def get_bollinger_bands(rm, rstd):
+    """Return upper and lower Bollinger Bands"""
+    
+    upper_band = rm + rstd*4    
+    lower_band = rm - rstd*4    
+    
+    return upper_band, lower_band
+
+def test_run_get_bollinger_bands():
+    dates = pd.date_range('2012-01-01', '2012-12-31')
+    symbols = ['SPY']
+    df = get_data(symbols, dates)
+
+    # Compute bollinger bands
+    # 1. Compute rolling mean
+    rm_SPY = get_rolling_mean(df['SPY'], window = 20)
+
+    # 2. Compute  rolling standard deviation
+    rstd_SPY = get_rolling_std(df['SPY'], window = 20)   
+    
+    # 3. Compute upper and lower bands
+    upper_band, lower_band = get_bollinger_bands(rm_SPY, rstd_SPY)
+    
+    # Plot raw SPY values, rolling mean and bollinger bands
+    ax = df['SPY'].plot(title="Bollinger Bands", label = 'SPY')
+    rm_SPY.plot(label='Rolling Mean', ax=ax)
+    upper_band.plot(label='upper band', ax=ax)
+    lower_band.plot(label='lower band', ax=ax)
+    
+    # Add axis labels and legend
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Price")
+    ax.legend(loc='upper left')
+    plt.show
+      
+    
 """ACTIONS"""
-
+test_run_0104_08()
+test_run_get_bollinger_bands()
 
   
     
