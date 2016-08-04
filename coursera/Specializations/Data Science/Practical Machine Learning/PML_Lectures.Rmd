@@ -1,0 +1,50 @@
+---
+output: pdf_document
+---
+
+# Practical Machine Learning
+
+### Settings
+```{r Settings, echo = TRUE, eval = FALSE, results = "hide", warning = FALSE}
+
+# options(error = recover)
+
+rm(list=ls())
+
+
+# Example: remove all objects EXCEPT x
+# x <- 1
+# y <- 2
+# z <- 3
+# ls()
+# [1] "x" "y" "z"
+# 
+# rm(list=setdiff(ls(), "x"))
+# 
+# ls()
+# [1] "x"
+# Packages
+library(PerformanceAnalytics)
+library(zoo)
+library(tseries)
+library(mvtnorm)
+library(kernlab)
+
+getwd()
+# setwd("C:/repos/research/r_analysis/likevekter_enoyr2017/data")
+dir()
+
+```
+
+### L01 - What is prediction
+```{r L01 - What is prediction, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+
+
+
+
+setwd("C:/repos_github/coursera/Specializations/Data Science/Practical Machine Learning")
+dir()
+data(spam)
+head(spam)
+
+```
