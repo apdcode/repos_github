@@ -36,7 +36,7 @@ dir()
 
 ```
 
-### L01 - What is prediction
+### W01L01 - What is prediction
 ```{r L01 - What is prediction, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
 
 
@@ -45,6 +45,17 @@ dir()
 setwd("C:/repos_github/coursera/Specializations/Data Science/Practical Machine Learning")
 dir()
 data(spam)
+df1 <- data.frame(spam)
 head(spam)
+
+plot(density(spam$your[spam$type=="nonspam"]),
+     col = 'blue', main = "Spam", xlab = "Frequency of")
+lines(density(spam$your[spam$type=="spam"]), col = "red")
+
+# Make simple function.
+# Find cutoff value C for number of 'yours' to indicate spam
+abline(v=0.5, col = "black")
+prediction <- ifelse(spam$your > 0.5, "spam", "nonspam")
+table(prediction, spam$type)/length(spam$type)
 
 ```
