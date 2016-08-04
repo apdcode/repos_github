@@ -152,7 +152,7 @@ def test_run_get_bollinger_bands():
     
 """ACTIONS"""
 test_run_0104_08()
-test_run_get_bollinger_bands()
+# test_run_get_bollinger_bands()
 
   
     
