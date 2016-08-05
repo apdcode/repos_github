@@ -36,8 +36,8 @@ dir()
 
 ```
 
-### W01L01 - What is prediction
-```{r L01 - What is prediction, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+### W01L02 - What is prediction?
+```{r L02 - What is prediction, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
 
 
 
@@ -49,13 +49,88 @@ df1 <- data.frame(spam)
 head(spam)
 
 plot(density(spam$your[spam$type=="nonspam"]),
-     col = 'blue', main = "Spam", xlab = "Frequency of")
+     col = 'blue', main = "Spam", xlab = "Frequency of 'yours'")
 lines(density(spam$your[spam$type=="spam"]), col = "red")
 
 # Make simple function.
 # Find cutoff value C for number of 'yours' to indicate spam
 abline(v=0.5, col = "black")
 prediction <- ifelse(spam$your > 0.5, "spam", "nonspam")
-table(prediction, spam$type)/length(spam$type)
+df_prediction1 <- data.frame(table(prediction, spam$type)/length(spam$type))
+
+accuracy <- df_prediction1$Freq[1] +  df_prediction1$Freq[4]
+accuracy
+
+```
+
+### W01L03 - Relative importance of steps
+```{r W01L03 - Relative importance of steps, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+
+# question => data => features => algorithm
+
+# NO CODE
+```
+
+
+### W01L04 - In sample versus out of sample errors
+```{r W01L04 - In sample versus out of sample errors, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+
+# question => data => features => algorithm
+library(kernlab); data(spam); set.seed(333)
+smallSpam <- spam[sample(dim(spam)[1], size = 10),]
+spamLabel <- (smallSpam$type =="spam")*1 + 1
+plot(smallSpam$capitalAv, col = spamLabel)
+
+# Prediction rule 1
+rule1 <- function(x){
+  prediction <- rep(NA, length(x))
+  prediction[x > 2.7] <- "spam"
+  prediction[x < 2.40] <- "nonspam"
+  prediction[(x >= 2.40 & x <= 2.45)] <= "spam"
+  prediction[(x > 2.45 & x <= 2.70)] <= "nonspam"
+  
+  return(prediction)
+}
+
+table(rule1(smallSpam$capitalAve), smallSpam$type)
+
+# Prediction rule 2
+rule2 <- function(x){
+  prediction <- rep(NA, length(x))
+  prediction[x > 2.8] <- "spam"
+  prediction[x <= 2.8] <- "nonspam"
+  
+  return(prediction)
+}
+
+table(rule2(smallSpam$capitalAve), smallSpam$type)
+
+# Aplly rules to whole spam datasaet
+table(rule1(spam$capitalAve), spam$type)
+table(rule2(spam$capitalAve), spam$type)
+
+mean(rule1(spam$capitalAve)==spam$type)
+sum(rule1(spam$capitalAve)==spam$type)
+sum(rule2(spam$capitalAve)==spam$type)
+
+```
+
+
+### W01L06 - Types of errors
+```{r W01L06 - Types of errors, echo = TRUE, eval = TRUE, results = "hide", warning = FALSE}
+
+# Sensitivity                 Pr(positive test | disease)       TP / (TP + FN)
+# Specificity                 Pr(negative test | no disease)    TN / (FP + TN)
+# Positive predictive value   Pr(disease | positive test)       TP / (TP + FP)
+# Negative predictive value   Pr(no disease | negative test)    TN / (FN + TN)
+# Accuracy                    Pr(accurate outcome)              (TP + TN) / (TP + FP + TN + FN)
+
+
+
+
+
+
+
+
 
 ```
